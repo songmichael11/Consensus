@@ -39,6 +39,7 @@ def get_feed(user_id):
         # the monstrous subquery is to cross reference a particular postID with the 
         # inputted userID, and if one exists in the bookmarked bridge table,
         # then mark that particular post/row as a "saved" post 
+        # im ngl this took forever to do
         query = """SELECT 
                     p.PostID,
                     p.Title,
@@ -66,7 +67,7 @@ def get_feed(user_id):
                 query += """ AND 2=2"""
                 params.append(user_id)
             elif filter == 'saved':
-                query += f""" AND (SELECT COUNT(u.UserID) 
+                query += f""" AND (SELECT COUNT(bu.UserID) 
                                 FROM BookmarkedUsers bu
                                 WHERE bu.PostID = p.PostID
                                     AND bu.UserID = {user_id}) > 0"""
