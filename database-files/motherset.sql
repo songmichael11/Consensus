@@ -8,7 +8,7 @@ CREATE TABLE Users (
     UserID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
     PoliticalParty VARCHAR(100),
-    Bio TEXT DEFAULT "",
+    Bio TEXT,
     NumFollowers INT DEFAULT 0,
     NumFollowing INT DEFAULT 0
 );
