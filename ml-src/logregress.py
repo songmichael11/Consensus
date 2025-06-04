@@ -10,7 +10,7 @@ def log_regress(X, y, w, alpha = 0.5, max_iter = 1000):
     iter = 0
 
     while runalg:
-        x = X[i]
+        x = X[i,:]
         dot_prod = np.dot(x, w)
         y_hat = 1 / (1 + np.exp(-dot_prod))
         gradient = (y_hat - y[i]) * x
@@ -20,8 +20,8 @@ def log_regress(X, y, w, alpha = 0.5, max_iter = 1000):
             i = 0
             iter += 1
         if iter > max_iter:
-            print(iter)
             runalg = False
             break
     
     return w
+
