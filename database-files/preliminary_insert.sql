@@ -1,20 +1,23 @@
-INSERT INTO Users(Name, PoliticalParty, Bio)
+Use Consensus_DB;
+
+INSERT INTO Users(UserID, Name, PoliticalParty, Bio)
         VALUES
-        ("Prince Maximilian William-Lancelot Robertson III", "People's Party of Europe", "I'm British."),
-        ("JT Nance", "Democrat Party", "I did NOT kill the pope"),
-        ("Emeka Okonkwo", "Green Party", "Hello! I love the economy.")
+        (1, "Prince Maximilian William-Lancelot Robertson III", "People's Party of Europe", "I'm British."),
+        (2, "JT Nance", "Democrat Party", "I did NOT kill the pope"),
+        (3, "Emeka Okonkwo", "Green Party", "Hello! I love the economy.");
 
 INSERT INTO Roles(RoleType)
         VALUES
         ("Politician"),
         ("Voter"),
-        ("Economist")
+        ("Economist");
 
 INSERT INTO RolesUsers(RoleID, UserID)
         VALUES
         (1, 1),
         (2, 2),
-        (3, 3)
+        (3, 3),
+        (2, 3);
 
 INSERT INTO Graphs (
         XAxis, XMin, XMax, XStep,
