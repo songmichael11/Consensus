@@ -36,9 +36,6 @@ def get_feed(user_id):
 
         current_app.logger.info("Starting query")
         # get details for a specific user
-        # the monstrous subquery is to cross reference a particular postID with the 
-        # inputted userID, and if one exists in the bookmarked bridge table,
-        # then mark that particular post/row as a "saved" post 
         # im ngl this took forever to do
         query = """SELECT 
                     p.PostID,
@@ -46,20 +43,31 @@ def get_feed(user_id):
                     p.Description,
                     p.NumUpvotes,
                     p.NumDownvotes,
-                    p.numEndorsements,
+                    p.NumEndorsements,
                     p.IsHidden,
                     author.Name AS author,
-                    CASE WHEN (SELECT COUNT(bu.UserID) 
-                                FROM BookmarkedUsers bu
-                                WHERE bu.PostID = p.PostID
-                                    AND bu.UserID = %s) > 0
+                    CASE WHEN bu.UserID IS NOT NULL 
                         THEN 'Saved' ELSE 'Not Saved' END AS bookmarked,
+                    CASE WHEN uu.UserID IS NOT NULL 
+                        THEN 'Upvoted' ELSE 'Not Upvoted' END AS upvoted,
+                    CASE WHEN du.UserID IS NOT NULL 
+                        THEN 'Downvoted' ELSE 'Not Downvoted' END AS downvoted,
+                    CASE WHEN eu.UserID IS NOT NULL 
+                        THEN 'Endorsed' ELSE 'Not Endorsed' END AS endorsed,
                     p.GraphID
                     FROM Posts p
                     JOIN Users author 
                         ON p.UserID = author.UserID
+                    LEFT JOIN BookmarkedUsers bu 
+                        ON bu.PostID = p.PostID AND bu.UserID = %s
+                    LEFT JOIN UpvotesUsers uu 
+                        ON uu.PostID = p.PostID AND uu.UserID = %s
+                    LEFT JOIN DownvotesUsers du 
+                        ON du.PostID = p.PostID AND du.UserID = %s
+                    LEFT JOIN EndorsementsUsers eu 
+                        ON eu.PostID = p.PostID AND eu.UserID = %s
                     WHERE 1=1"""
-        params = [user_id]
+        params = [user_id, user_id, user_id, user_id]
 
         # add paramter filters
         if filter:
@@ -67,10 +75,7 @@ def get_feed(user_id):
                 query += """ AND 2=2"""
                 params.append(user_id)
             elif filter == 'saved':
-                query += f""" AND (SELECT COUNT(bu.UserID) 
-                                FROM BookmarkedUsers bu
-                                WHERE bu.PostID = p.PostID
-                                    AND bu.UserID = {user_id}) > 0"""
+                query += " AND bu.UserID IS NOT NULL"
 
         if search:
             pass # TODO: search functionality                
