@@ -8,6 +8,7 @@ from backend.db_connection import db
 from backend.simple.simple_routes import simple_routes
 from backend.ngos.ngo_routes import ngos
 from backend.landing.landing_routes import landing
+from backend.feed.feed_routes import feed
 
 def create_app():
     app = Flask(__name__)
@@ -49,6 +50,7 @@ def create_app():
     app.register_blueprint(simple_routes)
     app.register_blueprint(ngos, url_prefix="/ngo")
     app.register_blueprint(landing, url_prefix="/landing")
+    app.register_blueprint(feed, url_prefix="/feed")
 
     # Don't forget to return the app object
     return app
