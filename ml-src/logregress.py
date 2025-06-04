@@ -25,3 +25,15 @@ def log_regress(X, y, w, alpha = 0.5, max_iter = 1000):
     
     return w
 
+def lin_regress(X,y,bias_col=False):
+    if bias_col:
+        X = np.hstack([np.ones(len(y)).reshape(-1,1), X])
+    XTXinv = np.linalg.inv(np.dot(X.T,X))
+    XTy = np.dot(X.T, y)
+    c = np.dot(XTXinv, XTy)
+    return c
+
+X=np.array([[1],
+           [2]])
+y = np.array([[2],
+           [3]])
