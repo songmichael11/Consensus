@@ -24,7 +24,7 @@ def get_feed(user_id):
         filter = request.args.get("filter_by")
         search = request.args.get("search")
         sort = request.args.get("sort_by")
-        limit = request.args.get("limit")
+        limit = request.args.get("limit", type=int)
 
         if sort and (sort not in ['newest', 'oldest', 'top', 'bottom']):
             return jsonify({"error": "sort parameter must be one of [newest, oldest, top, bottom]"})
@@ -73,9 +73,8 @@ def get_feed(user_id):
 
         # add paramter filters
         if filter:
-            if filter == 'following': # TODO: following filter 
+            if filter == 'following':
                 query += " AND ff.FollowerID IS NOT NULL"
-                params.append(user_id)
             elif filter == 'saved':
                 query += " AND bu.UserID IS NOT NULL"
 
@@ -91,7 +90,7 @@ def get_feed(user_id):
                 query += " ORDER BY karma DESC, p.CreatedAt DESC"
             elif sort == 'bottom':
                 query += " ORDER BY karma ASC, p.CreatedAt DESC"
-        else: # if no paramter provided, default order by newest
+        else: # if no parameter provided, default order by newest
             query += " ORDER BY p.CreatedAt DESC"
 
         if limit:

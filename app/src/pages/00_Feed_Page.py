@@ -18,11 +18,11 @@ if not user_id:
     st.error("No user logged in. Please return to home page and log in.")
     st.stop()
 
-
-def getFeed(user_id):
+def getFeed(user_id, params):
     API_URL = f"http://web-api:4000/feed/posts/{user_id}"
+
     try:
-        response = requests.get(API_URL)
+        response = requests.get(API_URL, params=params)
         feed = response.json()
         logger.info(f"Loaded {len(feed)} posts.")
         return feed
@@ -30,23 +30,35 @@ def getFeed(user_id):
         st.error(f"Error loading feed: {e}")
         st.stop()
 
+def getParams(sort, filter, search):
+    params = {}
+    if sort != "Newest":
+        params["sort_by"] = sort.lower()
+    if filter != "All":
+        params["filter_by"] = filter.lower()
+    if search:
+        params["search"] = search
+    
+    return params
+
 # Page Title → e.g. "Voter Feed ("Home")"
-role = st.session_state["Roles"][0]
-st.markdown(f"### {role} Feed")
+st.markdown(f"### {st.session_state['Roles'][0]} Feed")
 
 header_col1, header_col2, header_col3 = st.columns([1, 1, 2])
 
 with header_col1:
-    sort_option = st.selectbox("Sort by…", ["Newest", "Oldest", "Top", "Bottom"])
+    sort = st.selectbox("Sort by…", ["Newest", "Oldest", "Top", "Bottom"])
 
 with header_col2:
-    filter_option = st.selectbox("Filter by…", ["All", "Following", "Saved"])
+    filter = st.selectbox("Filter by…", ["All", "Following", "Saved"])
 
 with header_col3:
-    search_text = st.text_input("Search")
+    search = st.text_input("Search")
 
+#get parameters
+params = getParams(sort, filter, search)
 # Draw posts
-feed = getFeed(user_id)
+feed = getFeed(user_id, params)
 
 for post in feed:
     # Outer card
