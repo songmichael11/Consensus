@@ -51,7 +51,7 @@ def create_app():
     app.register_blueprint(simple_routes)
     app.register_blueprint(ngos, url_prefix="/ngo")
     app.register_blueprint(landing, url_prefix="/landing")
-    app.register_blueprint(post_utils, url_prefix="/post-a-b-c-d-skibidi-meme-utils") # making this deliberately stupid to test underscores and dashes functionality
+    app.register_blueprint(post_utils, url_prefix="/post_utils") # making this deliberately stupid to test underscores and dashes functionality
     app.register_blueprint(feed, url_prefix="/feed")
 
     # Don't forget to return the app object
