@@ -8,6 +8,7 @@ from backend.db_connection import db
 from backend.simple.simple_routes import simple_routes
 from backend.ngos.ngo_routes import ngos
 from backend.landing.landing_routes import landing
+from backend.post_utils.post_utils import post_utils
 from backend.feed.feed_routes import feed
 
 def create_app():
@@ -50,6 +51,7 @@ def create_app():
     app.register_blueprint(simple_routes)
     app.register_blueprint(ngos, url_prefix="/ngo")
     app.register_blueprint(landing, url_prefix="/landing")
+    app.register_blueprint(post_utils, url_prefix="/post-a-b-c-d-skibidi-meme-utils") # making this deliberately stupid to test underscores and dashes functionality
     app.register_blueprint(feed, url_prefix="/feed")
 
     # Don't forget to return the app object
