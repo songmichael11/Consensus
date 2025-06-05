@@ -18,16 +18,42 @@ INSERT INTO RolesUsers(RoleID, UserID)
         (2, 2),
         (3, 3);
 
+#---------- THE MOCK DATA WE HAVE IS FROM CHATGPT------
+# WE ARE GOING TO MOCKAROO DATA AFTER THIS DELIVERABLE
+
 INSERT INTO Graphs (
-        XAxis, XMin, XMax, XStep,
-        Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
-        Health, Education, Housing, Community_development,
-        Real_interest_rates, Productivity, Corporate_tax_rate, Inflation, Personal_property_tax
-        )
-        VALUES
-        ('GDP per Capita', 0, 100000, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-        ('Unemployment Rate', 0, 50, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-        ('Inflation', 0, 20, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    XAxis, XMin, XMax, XStep,
+    Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
+    Health, Education, Housing, Community_development,
+    Real_interest_rates, Productivity, Corporate_tax_rate, Inflation, Personal_property_tax,
+    IRLT,
+    Region_East_Asia_and_Pacific,
+    Region_Europe_and_Central_Asia,
+    Region_Latin_America_and_Caribbean,
+    Region_Middle_East_and_North_Africa
+)
+VALUES
+    ('GDP per Capita', 0, 100000, 1000,
+     0, 0, 0, 0,
+     0, 0, 0, 0,
+     0, 0, 0, 0, 0,
+     0,
+     0, 0, 0, 0),
+     
+    ('Unemployment Rate', 0, 50, 1,
+     0, 0, 0, 0,
+     0, 0, 0, 0,
+     0, 0, 0, 0, 0,
+     0,
+     0, 0, 0, 0),
+     
+    ('Inflation', 0, 20, 0.5,
+     0, 0, 0, 0,
+     0, 0, 0, 0,
+     0, 0, 0, 0, 0,
+     0,
+     0, 0, 0, 0);
+
 
 INSERT INTO Posts (Title, Description, UserID, GraphID, NumUpvotes, NumDownvotes)
 VALUES
