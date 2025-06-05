@@ -24,6 +24,7 @@ def get_feed(user_id):
         filter = request.args.get("filter_by")
         search = request.args.get("search")
         sort = request.args.get("sort_by")
+        limit = request.args.get("limit")
 
         if sort and (sort not in ['newest', 'oldest', 'top', 'bottom']):
             return jsonify({"error": "sort parameter must be one of [newest, oldest, top, bottom]"})
@@ -41,8 +42,7 @@ def get_feed(user_id):
                     p.PostID,
                     p.Title,
                     p.Description,
-                    p.NumUpvotes,
-                    p.NumDownvotes,
+                    p.NumUpvotes - p.NumDownvotes AS karma,
                     p.NumEndorsements,
                     p.IsHidden,
                     author.Name AS author,
@@ -66,19 +66,39 @@ def get_feed(user_id):
                         ON du.PostID = p.PostID AND du.UserID = %s
                     LEFT JOIN EndorsementsUsers eu 
                         ON eu.PostID = p.PostID AND eu.UserID = %s
+                    LEFT JOIN FollowingFollowees ff 
+                        ON ff.FolloweeID = p.UserID AND ff.FollowerID = %s
                     WHERE 1=1"""
-        params = [user_id, user_id, user_id, user_id]
+        params = [user_id, user_id, user_id, user_id, user_id]
 
         # add paramter filters
         if filter:
             if filter == 'following': # TODO: following filter 
-                query += """ AND 2=2"""
+                query += " AND ff.FollowerID IS NOT NULL"
                 params.append(user_id)
             elif filter == 'saved':
                 query += " AND bu.UserID IS NOT NULL"
 
         if search:
-            pass # TODO: search functionality                
+            pass # TODO: search functionality       
+
+        if sort:
+            if sort == 'newest':
+                query += " ORDER BY p.CreatedAt DESC"
+            elif sort == 'oldest':         
+                query += " ORDER BY p.CreatedAt ASC"
+            elif sort == 'top':
+                query += " ORDER BY karma DESC, p.CreatedAt DESC"
+            elif sort == 'bottom':
+                query += " ORDER BY karma ASC, p.CreatedAt DESC"
+        else: # if no paramter provided, default order by newest
+            query += " ORDER BY p.CreatedAt DESC"
+
+        if limit:
+            query += " LIMIT %s"
+            params.append(limit)
+        else: # default limit 10 posts in feed
+            query += " LIMIT 10"
         
         current_app.logger.debug(f'Executing query: {query}')
         cursor.execute(query, params)

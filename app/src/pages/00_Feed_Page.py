@@ -33,14 +33,24 @@ def getFeed(user_id):
 role = st.session_state["Roles"][0]
 st.markdown(f"### {role} Feed")
 
+header_col1, header_col2, header_col3 = st.columns([1, 1, 2])
+
+with header_col1:
+    sort_option = st.selectbox("Sort by…", ["Newest", "Oldest", "Top", "Bottom"])
+
+with header_col2:
+    filter_option = st.selectbox("Filter by…", ["All", "Following", "Saved"])
+
+with header_col3:
+    search_text = st.text_input("Search")
+
 # Draw posts
 feed = getFeed(user_id)
-
 
 for post in feed:
     # Outer card
     with st.container():
-        c1, c2, c3 = st.columns([0.1, 0.7, 0.2])
+        c1, c2, c3 = st.columns([0.1, 0.6, 0.3])
 
         with c1:
             # Upvotes, Downvotes, Endorsements
@@ -59,16 +69,16 @@ for post in feed:
             st.markdown("**Show more**")
 
         with c3:
-            # Graph (placeholder image — replace with your GraphID renderer)
-            st.image("https://via.placeholder.com/300x200?text=Graph")
-
             # Bookmark button (simple placeholder)
             if post['bookmarked'] == 'Saved':
-                bookmark_icon = "🔖"
+                bookmark_icon = "Bookmarked"
             else:
-                bookmark_icon = "📑"
+                bookmark_icon = "Not Bookmarked"
 
             st.button(f"{bookmark_icon}", key=f"bookmark_{post['PostID']}")
+
+            # Graph (placeholder image — replace with your GraphID renderer)
+            st.image("assets/placeholderGraph.gif", 100)
 
     # Divider between posts
     st.markdown("---")

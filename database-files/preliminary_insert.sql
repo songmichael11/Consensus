@@ -16,8 +16,7 @@ INSERT INTO RolesUsers(RoleID, UserID)
         VALUES
         (1, 1),
         (2, 2),
-        (3, 3),
-        (2, 3);
+        (3, 3);
 
 INSERT INTO Graphs (
         XAxis, XMin, XMax, XStep,
@@ -86,3 +85,17 @@ VALUES
 
     (3, 9);  -- Post 9 → 1 downvote
 
+
+INSERT INTO BookmarkedUsers (UserID, PostID)
+VALUES
+    (1, 1),  -- Prince bookmarked Post 1
+    (1, 4),  -- Prince bookmarked Post 4
+    (1, 6),  -- Prince bookmarked Post 6
+
+    (2, 2),  -- JT bookmarked Post 2
+    (2, 5),  -- JT bookmarked Post 5
+    (2, 9),  -- JT bookmarked Post 9
+
+    (3, 3),  -- Emeka bookmarked Post 3
+    (3, 7),  -- Emeka bookmarked Post 7
+    (3, 8);  -- Emeka bookmarked Post 8
