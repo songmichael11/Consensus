@@ -64,13 +64,13 @@ CREATE TABLE ModelWeights (
     Region_East_Asia_and_Pacific FLOAT NOT NULL,
     Region_Europe_and_Central_Asia FLOAT NOT NULL,
     Region_Latin_America_and_Caribbean FLOAT NOT NULL,
-    Region_Middle_East_and_North_Africa FLOAT NOT NULL
+    Region_Middle_East_and_North_Africa FLOAT NOT NULL,
     DateAdded DATETIME DEFAULT NOW()
 );
 
 CREATE TABLE PredictMetrics (
     MetricID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    Metric String NOT NULL,
+    Metric VARCHAR(10) NOT NULL,
     Population FLOAT NOT NULL,
     GDP_per_capita FLOAT NOT NULL,
     Trade_union_density FLOAT NOT NULL,
@@ -88,9 +88,9 @@ CREATE TABLE PredictMetrics (
     Region_East_Asia_and_Pacific FLOAT NOT NULL,
     Region_Europe_and_Central_Asia FLOAT NOT NULL,
     Region_Latin_America_and_Caribbean FLOAT NOT NULL,
-    Region_Middle_East_and_North_Africa FLOAT NOT NULL
+    Region_Middle_East_and_North_Africa FLOAT NOT NULL,
     DateAdded DATETIME DEFAULT NOW()
-)
+);
 
 CREATE TABLE Posts (
     PostID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
