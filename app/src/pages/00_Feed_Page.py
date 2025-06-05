@@ -5,6 +5,7 @@ import streamlit as st
 import requests
 from modules.nav import SideBarLinks
 
+
 # Page setup
 st.set_page_config(layout='wide')
 
@@ -50,14 +51,19 @@ feed = getFeed(user_id)
 for post in feed:
     # Outer card
     with st.container():
-        c1, c2, c3 = st.columns([0.1, 0.6, 0.3])
+        c1, c2, c3 = st.columns([0.1, 0.6, 0.3], vertical_alignment="center")
 
         with c1:
-            # Upvotes, Downvotes, Endorsements
-            st.button(f"🟢 {post['NumUpvotes']}", key=f'upvote{post["PostID"]}')
-            st.button(f"🔴 {post['NumDownvotes']}", key=f'downvote{post["PostID"]}')
-            st.button(f"🔵 {post['NumEndorsements']}", key=f'endorsement{post["PostID"]}')
-
+                # Upvotes, Downvotes, Endorsements
+                with st.container():
+                    st.button(f"🟢", key=f'upvote{post["PostID"]}')
+                    
+                    c1a, c1b, c1c = st.columns([0.5, 20, 50]) #invisible columns to fix alignments
+                    with c1b:
+                        st.html(f"<p style='font-size: 30px; text-align: right;'>{str(post['karma']).strip()}</p>")
+                    st.button(f"🔴", key=f'downvote{post["PostID"]}')
+                with st.container():
+                    st.button("🔵", key=f'endorsement{post["PostID"]}')
 
         with c2:
             # Title, Author, Description
@@ -78,7 +84,7 @@ for post in feed:
             st.button(f"{bookmark_icon}", key=f"bookmark_{post['PostID']}")
 
             # Graph (placeholder image — replace with your GraphID renderer)
-            st.image("assets/placeholderGraph.gif", 100)
+            st.image("assets/placeholderGraph.gif")
 
     # Divider between posts
     st.markdown("---")
