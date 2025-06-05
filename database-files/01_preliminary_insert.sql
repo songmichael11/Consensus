@@ -1,3 +1,6 @@
+# THE MOCK DATA WE HAVE IS FROM CHAT
+# WE ARE GOING TO MOCKAROO DATA AFTER THIS DELIVERABLE
+
 Use Consensus_DB;
 
 INSERT INTO Users(UserID, Name, PoliticalParty, Bio)
@@ -19,15 +22,16 @@ INSERT INTO RolesUsers(RoleID, UserID)
         (3, 3);
 
 INSERT INTO Graphs (
-        XAxis, XMin, XMax, XStep,
-        Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
-        Health, Education, Housing, Community_development,
-        Real_interest_rates, Productivity, Corporate_tax_rate, Inflation, Personal_property_tax
-        )
-        VALUES
-        ('GDP per Capita', 0, 100000, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-        ('Unemployment Rate', 0, 50, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-        ('Inflation', 0, 20, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    XAxis, XMin, XMax, XStep,
+    Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
+    Health, Education, Housing, Community_development,
+    Real_interest_rates, Productivity, Corporate_tax_rate, Inflation, Personal_property_tax
+)
+VALUES
+    ('GDP per Capita', 0, 100000, 1000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    ('Unemployment Rate', 0, 50, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    ('Inflation', 0, 20, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
 
 INSERT INTO Posts (Title, Description, UserID, GraphID, NumUpvotes, NumDownvotes)
 VALUES

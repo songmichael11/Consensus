@@ -36,12 +36,18 @@ CREATE TABLE Graphs (
     Productivity FLOAT NOT NULL,
     Corporate_tax_rate FLOAT NOT NULL,
     Inflation FLOAT NOT NULL,
-    Personal_property_tax FLOAT NOT NULL
+    Personal_property_tax FLOAT NOT NULL,
+    IRLT FLOAT NOT NULL,
+    Region_East_Asia_and_Pacific FLOAT NOT NULL,
+    Region_Europe_and_Central_Asia FLOAT NOT NULL,
+    Region_Latin_America_and_Caribbean FLOAT NOT NULL,
+    Region_Middle_East_and_North_Africa FLOAT NOT NULL
 );
+
 
 CREATE TABLE ModelWeights (
     ModelID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    Population INT NOT NULL,
+    Population FLOAT NOT NULL,
     GDP_per_capita FLOAT NOT NULL,
     Trade_union_density FLOAT NOT NULL,
     Unemployment_rate FLOAT NOT NULL,
@@ -54,8 +60,37 @@ CREATE TABLE ModelWeights (
     Corporate_tax_rate FLOAT NOT NULL,
     Inflation FLOAT NOT NULL,
     Personal_property_tax FLOAT NOT NULL,
+    IRLT FLOAT NOT NULL,
+    Region_East_Asia_and_Pacific FLOAT NOT NULL,
+    Region_Europe_and_Central_Asia FLOAT NOT NULL,
+    Region_Latin_America_and_Caribbean FLOAT NOT NULL,
+    Region_Middle_East_and_North_Africa FLOAT NOT NULL
     DateAdded DATETIME DEFAULT NOW()
 );
+
+CREATE TABLE PredictMetrics (
+    MetricID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Metric String NOT NULL,
+    Population FLOAT NOT NULL,
+    GDP_per_capita FLOAT NOT NULL,
+    Trade_union_density FLOAT NOT NULL,
+    Unemployment_rate FLOAT NOT NULL,
+    Health FLOAT NOT NULL,
+    Education FLOAT NOT NULL,
+    Housing FLOAT NOT NULL,
+    Community_development FLOAT NOT NULL,
+    Real_interest_rates FLOAT NOT NULL,
+    Productivity FLOAT NOT NULL,
+    Corporate_tax_rate FLOAT NOT NULL,
+    Inflation FLOAT NOT NULL,
+    Personal_property_tax FLOAT NOT NULL,
+    IRLT FLOAT NOT NULL,
+    Region_East_Asia_and_Pacific FLOAT NOT NULL,
+    Region_Europe_and_Central_Asia FLOAT NOT NULL,
+    Region_Latin_America_and_Caribbean FLOAT NOT NULL,
+    Region_Middle_East_and_North_Africa FLOAT NOT NULL
+    DateAdded DATETIME DEFAULT NOW()
+)
 
 CREATE TABLE Posts (
     PostID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
