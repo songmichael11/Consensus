@@ -8,8 +8,8 @@ INSERT INTO Users(UserID, Name, PoliticalParty, Bio)
 
 INSERT INTO Roles(RoleType)
         VALUES
-        ("Politician"),
         ("Voter"),
+        ("Politician"),
         ("Economist");
 
 INSERT INTO RolesUsers(RoleID, UserID)
@@ -30,8 +30,59 @@ INSERT INTO Graphs (
         ('Unemployment Rate', 0, 50, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ('Inflation', 0, 20, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-INSERT INTO Posts (Title, Description, UserID, GraphID)
-        VALUES
-        ('Post 1 Title', 'This is the description of Post 1.', 1, 1),
-        ('Post 2 Title', 'This is the description of Post 2.', 2, 2),
-        ('Post 3 Title', 'This is the description of Post 3.', 3, 3);
+INSERT INTO Posts (Title, Description, UserID, GraphID, NumUpvotes, NumDownvotes)
+VALUES
+    ('Post 1 Title', 'This is the description of Post 1.', 1, 1, 3, 1),
+    ('Post 2 Title', 'This is the description of Post 2.', 2, 2, 2, 2),
+    ('Post 3 Title', 'This is the description of Post 3.', 3, 3, 1, 2),
+    ('Post 4 Title', 'Exploring new policies in healthcare.', 1, 2, 1, 1),
+    ('Post 5 Title', 'Debate on climate change strategies.', 2, 3, 2, 1),
+    ('Post 6 Title', 'Economic impacts of tax reform.', 3, 1, 3, 1),
+    ('Post 7 Title', 'Education reforms for the next decade.', 1, 3, 1, 2),
+    ('Post 8 Title', 'Housing market trends and predictions.', 2, 1, 1, 3),
+    ('Post 9 Title', 'Community engagement and public safety.', 3, 2, 2, 1);
+
+
+INSERT INTO UpvotesUsers (UserID, PostID)
+VALUES
+    (1, 1),
+    (2, 1),
+    (3, 1),  -- Post 1 → 3 upvotes
+
+    (1, 2),
+    (3, 2),  -- Post 2 → 2 upvotes
+
+    (2, 3),  -- Post 3 → 1 upvote
+
+    (1, 4),  -- Post 4 → 1 upvote
+
+    (2, 5), (3, 5),  -- Post 5 → 2 upvotes
+
+    (1, 6), (2, 6), (3, 6),  -- Post 6 → 3 upvotes
+
+    (1, 7),  -- Post 7 → 1 upvote
+
+    (3, 8),  -- Post 8 → 1 upvote
+
+    (1, 9), (2, 9);  -- Post 9 → 2 upvotes
+
+INSERT INTO DownvotesUsers (UserID, PostID)
+VALUES
+    (2, 1),  -- Post 1 → 1 downvote
+
+    (1, 2), (3, 2),  -- Post 2 → 2 downvotes
+
+    (1, 3), (2, 3),  -- Post 3 → 2 downvotes
+
+    (3, 4),  -- Post 4 → 1 downvote
+
+    (2, 5),  -- Post 5 → 1 downvote
+
+    (1, 6),  -- Post 6 → 1 downvote
+
+    (2, 7), (3, 7),  -- Post 7 → 2 downvotes
+
+    (1, 8), (2, 8), (3, 8),  -- Post 8 → 3 downvotes
+
+    (3, 9);  -- Post 9 → 1 downvote
+
