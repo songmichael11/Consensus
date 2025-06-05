@@ -21,7 +21,7 @@ def put_upvote(post_id, user_id):
             WHERE UserID = %s AND PostID = %s
         """
         cursor.execute(check_query, (user_id, post_id))
-        exists = cursor.fetchone()[0] > 0
+        exists = cursor.fetchone()['COUNT(*)'] > 0
 
         if exists: # If the user has already upvoted the post, return a 200 status
             current_app.logger.info(f"User {user_id} has already upvoted post {post_id}")
