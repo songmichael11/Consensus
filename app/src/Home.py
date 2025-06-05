@@ -5,6 +5,10 @@
 
 # Set up basic logging infrastructure
 import logging
+import streamlit as st
+from modules.nav import SideBarLinks
+import requests
+
 logging.basicConfig(format='%(filename)s:%(lineno)s:%(levelname)s -- %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -75,4 +79,26 @@ if st.button('Act as System Administrator',
     st.session_state['first_name'] = 'SysAdmin'
     st.switch_page('pages/20_Admin_Home.py')
 
+st.markdown("---")
+st.markdown("### Who would you like to log in as?")
 
+# Login Buttons in three columns
+b1, b2, b3 = st.columns(3)
+
+with b1:
+    if st.button("Log in as Voter,\nPrince Maximilian", use_container_width=True):
+        updateSessionState(1)
+        st.success("Logged in as Voter")
+        st.switch_page('pages/00_Feed_Page.py')
+
+with b2:
+    if st.button("Log in as Politician,\nJT Nance", use_container_width=True):
+        updateSessionState(2)
+        st.success("Logged in as Politician")
+        st.switch_page('pages/00_Feed_Page.py')
+
+with b3:
+    if st.button("Log in as Economist,\nEmeka Okonkwo", use_container_width=True):
+        updateSessionState(3)
+        st.success("Logged in as Economist")
+        st.switch_page('pages/00_Feed_Page.py')
