@@ -283,3 +283,72 @@ def delete_endorsement(post_id, user_id):
     except Error as e:
         current_app.logger.error(f"Database error in delete_endorsement: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+# PUT request to add a bookmark to a post
+# Handles the case where user has already bookmarked by returning a 200 status
+# Example: /post_utils/post/193/bookmark/456
+@post_utils.route("/post/<int:post_id>/bookmark/<int:user_id>", methods=["PUT"])
+def put_bookmark(post_id, user_id):
+    try:
+        current_app.logger.info(f"Starting put_bookmark request for post {post_id} by user {user_id}")
+        cursor = db.get_db().cursor()
+
+        # First check if the bookmark already exists
+        check_query = """
+            SELECT COUNT(*) 
+            FROM BookmarkedUsers 
+            WHERE UserID = %s AND PostID = %s
+        """
+        cursor.execute(check_query, (user_id, post_id))
+        exists = cursor.fetchone()["COUNT(*)"] > 0
+
+        if exists: # If the user has already bookmarked the post, return a 200 status
+            current_app.logger.info(f"User {user_id} has already bookmarked post {post_id}")
+            return jsonify({"message": "User has already bookmarked this post"}), 200
+
+        # If no existing bookmark, add the bookmark
+        insert_query = """
+            INSERT INTO BookmarkedUsers (UserID, PostID) 
+            VALUES (%s, %s)
+        """
+        cursor.execute(insert_query, (user_id, post_id))
+        
+        db.get_db().commit()
+        cursor.close()
+
+        current_app.logger.info(f"Successfully added bookmark for post {post_id} by user {user_id}")
+        return jsonify({"message": "Successfully bookmarked post"}), 200
+
+    except Error as e:
+        current_app.logger.error(f"Database error in put_bookmark: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
+# DELETE request to remove a bookmark from a post
+# Example: /post_utils/post/193/bookmark/456
+@post_utils.route("/post/<int:post_id>/bookmark/<int:user_id>", methods=["DELETE"])
+def delete_bookmark(post_id, user_id):
+    try:
+        current_app.logger.info(f"Starting delete_bookmark request for post {post_id} by user {user_id}")
+        cursor = db.get_db().cursor()
+
+        # Delete the bookmark
+        delete_query = """
+            DELETE FROM BookmarkedUsers 
+            WHERE UserID = %s AND PostID = %s
+        """
+        cursor.execute(delete_query, (user_id, post_id))
+        
+        # Check if any rows were actually deleted
+        if cursor.rowcount == 0:
+            current_app.logger.info(f"No bookmark found to delete for post {post_id} by user {user_id}")
+            return jsonify({"message": "No bookmark found to delete"}), 404
+        
+        db.get_db().commit()
+        cursor.close()
+
+        current_app.logger.info(f"Successfully removed bookmark for post {post_id} by user {user_id}")
+        return jsonify({"message": "Successfully removed bookmark"}), 200
+
+    except Error as e:
+        current_app.logger.error(f"Database error in delete_bookmark: {str(e)}")
+        return jsonify({"error": str(e)}), 500
