@@ -68,14 +68,24 @@ for post in feed:
         with c1:
                 # Upvotes, Downvotes, Endorsements
                 with st.container():
-                    st.button(f"🟢", key=f'upvote{post["PostID"]}')
+                    if (post["upvoted"]) == "Upvoted":
+                        upvoteIcon = "🔼"
+                    else:
+                        upvoteIcon = "🔺"
+                    if (post["downvoted"]) == "Downvoted":
+                        downvoteIcon = "🔽"
+                    else:
+                        downvoteIcon = "🔻"
+                    if (post["endorsed"]) == "Endorsed":
+                        endorsedIcon = "✅"
+                    else:
+                        endorsedIcon = "✔️"
                     
-                    c1a, c1b, c1c = st.columns([0.5, 20, 50]) #invisible columns to fix alignments
-                    with c1b:
-                        st.html(f"<p style='font-size: 30px; text-align: right;'>{str(post['karma']).strip()}</p>")
-                    st.button(f"🔴", key=f'downvote{post["PostID"]}')
+                    st.button(label=upvoteIcon, key=f'upvote{post["PostID"]}')  
+                    st.html(f"<p style='font-size: 30px; text-align: right; margin-right: 60px'>{str(post['karma']).strip()}</p>")
+                    st.button(label=downvoteIcon, key=f'downvote{post["PostID"]}')
                 with st.container():
-                    st.button("🔵", key=f'endorsement{post["PostID"]}')
+                    st.button(label=endorsedIcon, key=f'endorsement{post["PostID"]}')
 
         with c2:
             # Title, Author, Description
@@ -96,7 +106,7 @@ for post in feed:
             st.button(f"{bookmark_icon}", key=f"bookmark_{post['PostID']}")
 
             # Graph (placeholder image — replace with your GraphID renderer)
-            st.image("assets/placeholderGraph.gif")
+            st.image("assets/posts/placeholderGraph.gif")
 
     # Divider between posts
     st.markdown("---")
