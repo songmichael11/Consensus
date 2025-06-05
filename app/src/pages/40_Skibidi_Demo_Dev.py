@@ -1,9 +1,18 @@
+"""
+shits broken but im gonna fix it tomorrow morning
+"""
+
+
 import streamlit as st
+from streamlit_extras.app_logo import add_logo
+from modules.nav import SideBarLinks
 import requests
 import json
 
+SideBarLinks()
+
 # Constants for your API
-API_BASE_URL = "http://localhost:4000"  # Your Flask API URL
+API_BASE_URL = "http://web-api:4000"  # Your Flask API URL
 
 def update_ngo(ngo_id, update_data):
     """
@@ -29,6 +38,8 @@ def update_ngo(ngo_id, update_data):
 # Example usage in your Streamlit page
 def main():
     st.title("Update NGO Information")
+
+    st.button("yo")
     
     # Input for NGO ID
     ngo_id = st.number_input("Enter NGO ID", min_value=1, step=1)
