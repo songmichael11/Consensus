@@ -81,13 +81,13 @@ for post in feed:
                 # Upvotes, Downvotes, Endorsements
                 with st.container():
                     if (post["upvoted"]) == "Upvoted":
-                        upvoteIcon = "🔺"
+                        upvoteIcon = "⬆"
                     else:
-                        upvoteIcon = "🔼"
+                        upvoteIcon = "⇧"
                     if (post["downvoted"]) == "Downvoted":
-                        downvoteIcon = "🔻"
+                        downvoteIcon = "⬇"
                     else:
-                        downvoteIcon = "🔽"
+                        downvoteIcon = "⇩"
                     if (post["endorsed"]) == "Endorsed":
                         endorsedIcon = "✅"
                     else:
@@ -111,14 +111,20 @@ for post in feed:
                         if response.status_code == 200:
                             st.rerun()
                 with st.container():
-                    if st.button(label=endorsedIcon, key=f'endorsement{post["PostID"]}'):
-                        if post['endorsed'] == "Endorsed":
-                            response = updatePostUtils("delete", "endorsement", post["PostID"], user_id)
-                        else:
-                            response = updatePostUtils("put", "endorsement", post["PostID"], user_id)
+                    c1a, c1b = st.columns([0.8, 0.2], vertical_alignment="bottom")
 
-                        if response.status_code == 200:
-                            st.rerun()
+                    with c1a:
+                        if st.button(label=endorsedIcon, key=f'endorsement{post["PostID"]}', type='secondary'):
+                            if post['endorsed'] == "Endorsed":
+                                response = updatePostUtils("delete", "endorsement", post["PostID"], user_id)
+                            else:
+                                response = updatePostUtils("put", "endorsement", post["PostID"], user_id)
+
+                            if response.status_code == 200:
+                                st.rerun()
+
+                    with c1b:
+                        st.html(f"<p style='font-size: 15px; text-align: left; margin-left: -30px; margin-bottom: -10px'>{str(post['NumEndorsements'])}</p>")
 
         with c2:
             # Title, Author, Description
@@ -132,9 +138,9 @@ for post in feed:
         with c3:
             # Bookmark button (simple placeholder)
             if post['bookmarked'] == 'Saved':
-                bookmark_icon = "Bookmarked"
+                bookmark_icon = "💾"
             else:
-                bookmark_icon = "Not Bookmarked"
+                bookmark_icon = "Not Saved"
 
             if st.button(f"{bookmark_icon}", key=f"bookmark_{post['PostID']}"):
                 if post['bookmarked'] == "Saved":
