@@ -4,6 +4,7 @@ logger = logging.getLogger(__name__)
 import streamlit as st
 import requests
 from modules.nav import SideBarLinks
+import plotly.graph_objects as go
 
 
 # page setup
@@ -152,7 +153,9 @@ for post in feed:
                     st.rerun()
 
             # Graph (placeholder image — replace with your GraphID renderer)
-            st.image("assets/posts/placeholderGraph.gif")
+            response = requests.get(f"http://web-api:4000/models/posts/predict/{post['GraphID']}")
+            data = response.json()
+            st.plotly_chart(go.Figure(data=go.Scatter(x=data["x_values"], y=data['predictions'], mode="lines+markers")), key=f"plot{post['PostID']}")
 
     # Divider between posts
     st.markdown("---")
