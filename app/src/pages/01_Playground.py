@@ -185,6 +185,38 @@ def generate_fake_gini_data(feature_name, x_min, x_max, steps):
     
     return x_values, y_values
 
+def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
+    """Generate real GINI predictions using the backend API"""
+    try:
+        # Prepare the request data
+        data = {
+            "x_axis": x_axis,
+            "x_min": x_min,
+            "x_max": x_max,
+            "x_steps": steps,
+            **feature_values  # Include all feature values
+        }
+        
+        # Make the API call
+        response = requests.post(f"{API_BASE_URL}/playground/generate", json=data, timeout=10)
+        
+        if response.status_code == 200:
+            result = response.json()
+            predictions = result.get("predictions", [])
+            
+            # Extract x and y values from predictions
+            x_values = [p['x'] for p in predictions]
+            y_values = [p['y'] for p in predictions]
+            
+            return x_values, y_values
+        else:
+            st.error(f"Failed to generate predictions: {response.status_code}")
+            return None, None
+            
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error connecting to backend: {str(e)}")
+        return None, None
+
 # Initialize session state
 if 'graph_data' not in st.session_state:
     st.session_state.graph_data = None
@@ -429,19 +461,60 @@ with col3:
         elif steps < 5:
             st.error("Steps must be at least 5!")
         else:
-            # Generate fake data
-            with st.spinner("Generating predictions..."):
-                x_values, y_values = generate_fake_gini_data(compare_feature, x_min, x_max, int(steps))
-
-                # Store in session state
-                st.session_state.graph_data = {
-                    'x_values': x_values,
-                    'y_values': y_values,
-                    'feature_name': compare_feature
-                }
+            # Collect all feature values
+            feature_values = {
+                # X-axis related features (these will be set separately)
+                "XAxis": None,
+                "XMin": None,
+                "XMax": None,
+                "XStep": None,
                 
-                st.success("Graph generated successfully!")
-                st.rerun()
+                # Main features
+                "Population": population,
+                "GDP_per_capita": gdp_per_capita,
+                "Trade_union_density": trade_union,
+                "Corporate_tax_rate": corporate_tax,
+                "Education": education,
+                "Health": health,
+                "Housing": housing,
+                "Community_development": community,
+                "IRLT": irlt,
+                "Unemployment_rate": unemployment,
+                "Inflation": inflation,
+                "Real_interest_rates": real_interest,
+                "Productivity": productivity,
+                "Personal_property_tax": personal_tax,
+                
+                # Region features
+                "Region_East_Asia_and_Pacific": 0,
+                "Region_Europe_and_Central_Asia": 0,
+                "Region_Latin_America_and_Caribbean": 0,
+                "Region_Middle_East_and_North_Africa": 0
+            }
+            
+            backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
+            
+            with st.spinner("Generating predictions..."):
+                x_values, y_values = generate_real_predictions(
+                    feature_values,
+                    backend_feature_name,
+                    x_min,
+                    x_max,
+                    int(steps)
+                )
+                
+                if x_values is not None and y_values is not None:
+                    # Store in session state
+                    st.session_state.graph_data = {
+                        'x_values': x_values,
+                        'y_values': y_values,
+                        'feature_name': compare_feature
+                    }
+                    
+                    st.success("Graph generated successfully!")
+                    st.rerun()
+                else:
+                    st.error("Failed to generate predictions. Please try again.")
     
     # Save button
     if st.session_state.graph_data is not None:
@@ -451,25 +524,33 @@ with col3:
         if st.button("💾 Save Graph", use_container_width=True) and graph_name:
             # Collect all feature values
             feature_values = {
-                FEATURE_MAPPING["Population"]: population,
-                FEATURE_MAPPING["GDP_per_capita"]: gdp_per_capita,
-                FEATURE_MAPPING["Trade_union_density"]: trade_union,
-                FEATURE_MAPPING["Unemployment rate"]: unemployment,
-                FEATURE_MAPPING["Health"]: health,
-                FEATURE_MAPPING["Education"]: education,
-                FEATURE_MAPPING["Housing"]: housing,
-                FEATURE_MAPPING["Community development"]: community,
-                FEATURE_MAPPING["Productivity"]: productivity,
-                FEATURE_MAPPING["Real interest rates"]: real_interest,
-                FEATURE_MAPPING["Corporate_tax_rate"]: corporate_tax,
-                FEATURE_MAPPING["Inflation"]: inflation,
-                FEATURE_MAPPING["Personal/property tax"]: personal_tax,
-                FEATURE_MAPPING["IRLT"]: irlt,
-                # Add region features with default values
+                # X-axis related features (these will be set separately)
+                "XAxis": None,
+                "XMin": None,
+                "XMax": None,
+                "XStep": None,
+                
+                # Main features
+                "Population": population,
+                "GDP_per_capita": gdp_per_capita,
+                "Trade_union_density": trade_union,
+                "Unemployment_rate": unemployment,
+                "Health": health,
+                "Education": education,
+                "Housing": housing,
+                "Community_development": community,
+                "Real_interest_rates": real_interest,
+                "Productivity": productivity,
+                "Corporate_tax_rate": corporate_tax,
+                "Inflation": inflation,
+                "Personal_property_tax": personal_tax,
+                "IRLT": irlt,
+                
+                # Region features
                 "Region_East_Asia_and_Pacific": 0,
                 "Region_Europe_and_Central_Asia": 0,
                 "Region_Latin_America_and_Caribbean": 0,
-                "Region_Middle_East_and_North_Africa": 0,
+                "Region_Middle_East_and_North_Africa": 0
             }
             
             backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)

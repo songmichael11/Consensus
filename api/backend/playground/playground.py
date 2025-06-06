@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, current_app
 from backend.db_connection import db
 from mysql.connector import Error
 import numpy as np
+from backend.ml_models.logistic import predict_gini
 
 # Create a Blueprint for playground routes
 playground = Blueprint("playground", __name__)
@@ -60,25 +61,52 @@ def generate_graph():
         
         cursor = db.get_db().cursor()
 
-        current_app.logger.info("Executing first query")
+        current_app.logger.info("Fetching model weights")
+        
         # get weights of graph
-        cursor.execute("""SELECT COUNT(ModelID)
-                    FROM ModelWeights""")
-        weights = cursor.fetchone()
+        cursor.execute("""
+            SELECT Trade_union_density, Corporate_tax_rate, Education, Health, 
+                   Housing, Community_development, IRLT, Unemployment_rate, Population, 
+                   GDP_per_capita, Inflation, Region_East_Asia_and_Pacific, 
+                   Region_Europe_and_Central_Asia, Region_Latin_America_and_Caribbean, 
+                   Region_Middle_East_and_North_Africa, Real_interest_rates, 
+                   Productivity, Personal_property_tax
+            FROM ModelWeights 
+            WHERE ModelName = 'Logistic Regression'
+            ORDER BY DateAdded DESC 
+            LIMIT 1
+        """)
+        weights_row = cursor.fetchone()
+        if not weights_row:
+            return jsonify({"error": "No model weights found"}), 500
 
+        # Convert the row to a numpy array in the same order as FEATURE_VARIABLES
+        weights = np.array([weights_row[var] for var in FEATURE_VARIABLES], dtype=float)
+        current_app.logger.info(f"Model weights shape: {weights.shape}")
+        current_app.logger.info(f"Model weights: {weights}")
+
+        current_app.logger.info("Fetching standardization metrics")
+        
         # get describe metrics
-        cursor.execute("""SELECT Population, GDP_per_capita, Trade_union_density, Corporate_tax_rate, Education, 
-                    Health, Housing, Community_development, IRLT, Unemployment_rate,
-                    Inflation, Region_East_Asia_and_Pacific, 
-                    Region_Europe_and_Central_Asia, Region_Latin_America_and_Caribbean, 
-                    Region_Middle_East_and_North_Africa FROM PredictMetrics ORDER BY Metric""")
+        cursor.execute("""
+            SELECT Population, GDP_per_capita, Trade_union_density, Corporate_tax_rate, 
+                   Education, Health, Housing, Community_development, IRLT, Unemployment_rate,
+                   Inflation, Region_East_Asia_and_Pacific, Region_Europe_and_Central_Asia, 
+                   Region_Latin_America_and_Caribbean, Region_Middle_East_and_North_Africa,
+                   Real_interest_rates, Productivity, Personal_property_tax
+            FROM PredictMetrics 
+            ORDER BY Metric
+        """)
         rows = cursor.fetchall()
+        
+        if not rows or len(rows) != 2:
+            current_app.logger.error(f"Invalid number of rows in PredictMetrics: {len(rows) if rows else 0}")
+            return jsonify({"error": "Invalid standardization metrics data"}), 500
 
-        columns = [col for col in rows[0].keys() if col != 'Metric']
-
-        describe = [
-            [row[col] for col in columns] for row in rows
-            ]
+        # Convert to numpy array in the same order as FEATURE_VARIABLES
+        describe = np.array([[row[var] for var in FEATURE_VARIABLES] for row in rows])
+        current_app.logger.info(f"Describe metrics shape: {describe.shape}")
+        current_app.logger.info(f"Describe metrics: {describe}")
         
         # Generate predictions for each x value
         predictions = []
@@ -87,16 +115,27 @@ def generate_graph():
             features = feature_values.copy()
             features[x_axis] = x_val
             
-            current_app.logger.info('features: ', list(features.values()))
-            current_app.logger.info('describe: ', describe)
-            current_app.logger.info('weights: ', weights)
-
-            gini_prediction = predict_gini(list(features.values()), describe=describe, weights=weights, model="logistic")
+            # Ensure features are in the correct order as defined in FEATURE_VARIABLES
+            feature_vector = [features[var] for var in FEATURE_VARIABLES]
+            current_app.logger.info(f"Feature vector for x={x_val}: {feature_vector}")
             
-            predictions.append({
-                'x': float(x_val),
-                'y': float(gini_prediction)
-            })
+            try:
+                gini_prediction = predict_gini(
+                    feature_vector, 
+                    describe=describe, 
+                    weights=weights, 
+                    model="logistic"
+                )
+                
+                predictions.append({
+                    'x': float(x_val),
+                    'y': float(gini_prediction)
+                })
+            except Exception as e:
+                current_app.logger.error(f"Prediction error for x={x_val}: {str(e)}")
+                return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
+        
+        cursor.close()
         
         return jsonify({
             "predictions": predictions,
