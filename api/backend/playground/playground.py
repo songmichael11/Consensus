@@ -58,6 +58,28 @@ def generate_graph():
         
         x_values = np.linspace(x_min, x_max, x_steps)
         
+        cursor = db.get_db().cursor()
+
+        current_app.logger.info("Executing first query")
+        # get weights of graph
+        cursor.execute("""SELECT COUNT(ModelID)
+                    FROM ModelWeights""")
+        weights = cursor.fetchone()
+
+        # get describe metrics
+        cursor.execute("""SELECT Population, GDP_per_capita, Trade_union_density, Corporate_tax_rate, Education, 
+                    Health, Housing, Community_development, IRLT, Unemployment_rate,
+                    Inflation, Region_East_Asia_and_Pacific, 
+                    Region_Europe_and_Central_Asia, Region_Latin_America_and_Caribbean, 
+                    Region_Middle_East_and_North_Africa FROM PredictMetrics ORDER BY Metric""")
+        rows = cursor.fetchall()
+
+        columns = [col for col in rows[0].keys() if col != 'Metric']
+
+        describe = [
+            [row[col] for col in columns] for row in rows
+            ]
+        
         # Generate predictions for each x value
         predictions = []
         for x_val in x_values:
@@ -65,16 +87,17 @@ def generate_graph():
             features = feature_values.copy()
             features[x_axis] = x_val
             
-            # TODO: Replace this placeholder with actual model prediction
-            # For now, using a simple mock prediction based on feature values
-            gini_prediction = predict_gini(features)
+            current_app.logger.info('features: ', list(features.values()))
+            current_app.logger.info('describe: ', describe)
+            current_app.logger.info('weights: ', weights)
+
+            gini_prediction = predict_gini(list(features.values()), describe=describe, weights=weights, model="logistic")
             
             predictions.append({
                 'x': float(x_val),
                 'y': float(gini_prediction)
             })
         
-        current_app.logger.info(f"Successfully generated {len(predictions)} predictions")
         return jsonify({
             "predictions": predictions,
             "x_axis": x_axis,
@@ -237,7 +260,6 @@ def get_saved_graphs(user_id):
         
         cursor.close()
         
-        current_app.logger.info(f"Retrieved {len(saved_graphs)} saved graphs for user {user_id}")
         return jsonify({
             "user_id": user_id,
             "saved_graphs": saved_graphs
@@ -320,35 +342,3 @@ def get_features():
     except Exception as e:
         current_app.logger.error(f"Error in get_features: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
-# Placeholder function for GINI prediction
-# TODO: Replace this with your actual machine learning model
-def predict_gini(features):
-    """
-    Placeholder function for GINI prediction using logistic regression model.
-    
-    Args:
-        features (dict): Dictionary containing feature values
-        
-    Returns:
-        float: Predicted GINI coefficient (0-1 scale)
-    """
-    # This is a placeholder implementation
-    # Replace this with your actual trained model
-    
-    # Simple mock calculation for demonstration
-    # In reality, you would load your trained model and make predictions
-    base_gini = 0.3
-    
-    # Mock calculation using some features
-    gdp_effect = (features.get('GDP_per_capita', 0) / 50000) * 0.1
-    unemployment_effect = features.get('Unemployment_rate', 0) * 0.01
-    education_effect = features.get('Education', 0) * -0.05
-    
-    predicted_gini = base_gini + gdp_effect + unemployment_effect + education_effect
-    
-    # Ensure GINI is within valid range (0-1)
-    predicted_gini = max(0, min(1, predicted_gini))
-    
-    return predicted_gini
-
