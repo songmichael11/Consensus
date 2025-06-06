@@ -452,8 +452,8 @@ with col3:
             # Collect all feature values
             feature_values = {
                 FEATURE_MAPPING["Population"]: population,
-                FEATURE_MAPPING["GDP per capita"]: gdp_per_capita,
-                FEATURE_MAPPING["Trade union density"]: trade_union,
+                FEATURE_MAPPING["GDP_per_capita"]: gdp_per_capita,
+                FEATURE_MAPPING["Trade_union_density"]: trade_union,
                 FEATURE_MAPPING["Unemployment rate"]: unemployment,
                 FEATURE_MAPPING["Health"]: health,
                 FEATURE_MAPPING["Education"]: education,
@@ -461,7 +461,7 @@ with col3:
                 FEATURE_MAPPING["Community development"]: community,
                 FEATURE_MAPPING["Productivity"]: productivity,
                 FEATURE_MAPPING["Real interest rates"]: real_interest,
-                FEATURE_MAPPING["Corporate tax rate"]: corporate_tax,
+                FEATURE_MAPPING["Corporate_tax_rate"]: corporate_tax,
                 FEATURE_MAPPING["Inflation"]: inflation,
                 FEATURE_MAPPING["Personal/property tax"]: personal_tax,
                 FEATURE_MAPPING["IRLT"]: irlt,
