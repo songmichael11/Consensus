@@ -43,6 +43,8 @@ def get_post_predictions(graphID):
         cursor.execute(f"""SELECT {FEATURES} FROM PredictMetrics ORDER BY Metric""")
         rows = cursor.fetchall()
         
+        current_app.logger.info(rows)
+
         cursor.close()
 
         columns = [col for col in rows[0].keys() if col != 'Metric']
@@ -50,13 +52,6 @@ def get_post_predictions(graphID):
         describe = [
             [row[col] for col in columns] for row in rows
             ]
-
-        current_app.logger.info("describe")
-        current_app.logger.info("describe")
-        current_app.logger.info("describe")
-        current_app.logger.info("describe")
-
-        current_app.logger.info(describe)
 
         # get XAxis and range
         x_axis = row["XAxis"]
@@ -78,10 +73,8 @@ def get_post_predictions(graphID):
             x_input.pop("XMin", None)
             x_input.pop("XMax", None)
             x_input.pop("XStep", None)
-            current_app.logger.info(x_axis)
 
             x_input = list(x_input.values())
-            current_app.logger.info(x_input)
 
             gini = predict_gini(np.array(x_input), describe=np.array(describe), weights=np.array(weights), model="logistic")
 
@@ -102,20 +95,11 @@ def get_post_predictions(graphID):
     
 # GET request to get a plotly prediction graph for the data playground
 @models.route("/playground/predict", methods=["GET"])
-def get_playground_predictions(graphID):
+def get_playground_predictions():
     try:
-        current_app.logger.info(f"Starting gini_plot request for GraphID {graphID}")
         cursor = db.get_db().cursor()
 
-        # # get the graph row
-        # cursor.execute(f"""SELECT XAxis, XMin, XMax, XStep, {FEATURES} FROM Graphs WHERE GraphID = %s""", (graphID,))
-        # row = cursor.fetchone()
-        # current_app.logger.info(row)
-
-        # if row is None:
-        #     return jsonify({"error": "Graph not found"}), 404
-
-        data = request.get_json()
+        row = request.get_json()
 
         # get weights of graph
         cursor.execute(f"""SELECT {FEATURES} 
@@ -158,11 +142,8 @@ def get_playground_predictions(graphID):
             x_input.pop("XMin", None)
             x_input.pop("XMax", None)
             x_input.pop("XStep", None)
-            current_app.logger.info(x_axis)
-
 
             x_input = list(x_input.values())
-            current_app.logger.info(x_input)
 
             gini = predict_gini(np.array(x_input), describe=np.array(describe), weights=np.array(weights), model="logistic")
 
@@ -170,7 +151,7 @@ def get_playground_predictions(graphID):
 
         output = {}
         output["x_values"] = x_values.tolist()
-        output["predictions"] = gini_values.tolist()
+        output["predictions"] = gini_values
         output["x_axis"] = x_axis
 
 
