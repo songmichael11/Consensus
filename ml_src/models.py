@@ -1,8 +1,6 @@
 import numpy as np
-import math
-
 import pandas as pd
-
+import math
 
 def log_regress(X, y, w, alpha = 0.5, max_iter = 1000):
     runalg = True

@@ -146,44 +146,36 @@ PRESETS = {
     }
 }
 
-# Function to generate fake data for the graph
-def generate_fake_gini_data(feature_name, x_min, x_max, steps):
-    """Generate fake GINI coefficient data for demonstration - REPEATABLE"""
-    
-    # Create deterministic seed based on input parameters
-    # This ensures same inputs always produce same outputs
-    import hashlib
-    seed_string = f"{feature_name}_{x_min}_{x_max}_{steps}"
-    seed = int(hashlib.md5(seed_string.encode()).hexdigest()[:8], 16) % (2**31)
-    np.random.seed(seed)
-    
-    x_values = np.linspace(x_min, x_max, steps)
-    
-    # Create realistic-looking fake GINI data based on feature type
-    base_gini = 0.35  # Average GINI coefficient
-    noise = np.random.normal(0, 0.02, len(x_values))  # Deterministic noise now
-    
-    # Different patterns based on feature type
-    if "GDP" in feature_name or "capita" in feature_name:
-        # GDP per capita typically has inverse relationship with inequality
-        y_values = base_gini - (x_values - x_min) / (x_max - x_min) * 0.15 + noise
-    elif "Unemployment" in feature_name:
-        # Unemployment typically increases inequality
-        y_values = base_gini + (x_values - x_min) / (x_max - x_min) * 0.12 + noise
-    elif "Education" in feature_name or "Health" in feature_name:
-        # Education and health spending typically reduce inequality
-        y_values = base_gini - (x_values - x_min) / (x_max - x_min) * 0.10 + noise
-    else:
-        # Default pattern with slight upward trend
-        y_values = base_gini + (x_values - x_min) / (x_max - x_min) * 0.08 + noise
-    
-    # Ensure GINI values stay within realistic bounds (0.2 to 0.6)
-    y_values = np.clip(y_values, 0.2, 0.6)
-    
-    # Reset random state to avoid affecting other random operations
-    np.random.seed(None)
-    
-    return x_values, y_values
+
+
+def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
+    """Generate real GINI predictions using the actual model in the backend API"""
+    try:
+        # Prepare the request data with the correct structure for models endpoint
+        data = {
+            "XAxis": x_axis,
+            "XMin": x_min,
+            "XMax": x_max,
+            "XStep": steps,  # Send number of steps directly
+            **feature_values  # Include all feature values
+        }
+        
+        # Make the API call to the models endpoint
+        response = requests.post(f"{API_BASE_URL}/models/playground/predict", json=data, timeout=10)
+        
+        if response.status_code == 200:
+            result = response.json()
+            x_values = result.get("x_values", [])
+            y_values = result.get("predictions", [])
+            
+            return x_values, y_values
+        else:
+            st.error(f"Failed to generate predictions: {response.status_code}")
+            return None, None
+            
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error connecting to backend: {str(e)}")
+        return None, None
 
 # Initialize session state
 if 'graph_data' not in st.session_state:
@@ -193,8 +185,8 @@ if 'available_features' not in st.session_state:
 
 # Check authentication and get user ID
 if not st.session_state.get('authenticated', False):
-    st.error("🔐 Please log in first!")
-    st.info("👈 Use the sidebar to navigate to the home page and log in.")
+    st.error("Please log in first!!")
+    st.info("Use sidebar to navigate to home page and log in.")
     if st.button("🏠 Go to Home Page", type="primary"):
         st.switch_page('Home.py')
     st.stop()
@@ -202,7 +194,7 @@ if not st.session_state.get('authenticated', False):
 # Get user ID from session state (set during login)
 user_id = st.session_state.get('UserID')
 if not user_id:
-    st.error("❌ User ID not found in session. Please log in again.")
+    st.error("User ID not found in session state. Please log in again from the home page.")
     if st.button("🏠 Go to Home Page", type="primary"):
         st.switch_page('Home.py')
     st.stop()
@@ -225,10 +217,10 @@ if st.session_state.available_features is None:
             # Fallback to hardcoded features if backend is unavailable
             st.session_state.available_features = list(FEATURE_MAPPING.keys())
             st.warning("⚠️ Backend unavailable - using default features")
-#----------------------^^^^^^^^^^^^^^^^^^^^ Is this fetching of features from the backend necessary?
+# NOTE: ----------------------^^^^^^^^^^^^^^^^^^^^ Is this fetching of features from the backend necessary?
 
 
-# vvvvvvvvvvvvvvvv Very cool but do we need for rn 
+# NOTE: vvvvvvvvvvvvvvvv Very cool but do we need for rn 
 # Show current user info in sidebar
 with st.sidebar:
     st.markdown("### 👤 Current User")
@@ -429,19 +421,56 @@ with col3:
         elif steps < 5:
             st.error("Steps must be at least 5!")
         else:
-            # Generate fake data
-            with st.spinner("Generating predictions..."):
-                x_values, y_values = generate_fake_gini_data(compare_feature, x_min, x_max, int(steps))
-
-                # Store in session state
-                st.session_state.graph_data = {
-                    'x_values': x_values,
-                    'y_values': y_values,
-                    'feature_name': compare_feature
-                }
+            # Collect all feature values
+            feature_values = {
+                # Main features
+                "Population": population,
+                "GDP_per_capita": gdp_per_capita,
+                "Trade_union_density": trade_union,
+                "Unemployment_rate": unemployment,
+                "Health": health,
+                "Education": education,
+                "Housing": housing,
+                "Community_development": community,
+                "Productivity": productivity,
+                "Real_interest_rates": real_interest,
+                "Corporate_tax_rate": corporate_tax,
+                "Inflation": inflation,
+                "Personal_property_tax": personal_tax,
+                "IRLT": irlt,
                 
-                st.success("Graph generated successfully!")
-                st.rerun()
+                # Region features
+                "Region_East_Asia_and_Pacific": 0,
+                "Region_Europe_and_Central_Asia": 0,
+                "Region_Latin_America_and_Caribbean": 0,
+                "Region_Middle_East_and_North_Africa": 0
+            }
+            
+
+            
+            backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
+            
+            with st.spinner("Generating predictions..."):
+                x_values, y_values = generate_real_predictions(
+                    feature_values,
+                    backend_feature_name,
+                    x_min,
+                    x_max,
+                    int(steps)
+                )
+                
+                if x_values is not None and y_values is not None:
+                    # Store in session state
+                    st.session_state.graph_data = {
+                        'x_values': x_values,
+                        'y_values': y_values,
+                        'feature_name': compare_feature
+                    }
+                    
+                    st.success("Graph generated successfully!")
+                    st.rerun()
+                else:
+                    st.error("Failed to generate predictions. Please try again.")
     
     # Save button
     if st.session_state.graph_data is not None:
@@ -451,25 +480,27 @@ with col3:
         if st.button("💾 Save Graph", use_container_width=True) and graph_name:
             # Collect all feature values
             feature_values = {
-                FEATURE_MAPPING["Population"]: population,
-                FEATURE_MAPPING["GDP_per_capita"]: gdp_per_capita,
-                FEATURE_MAPPING["Trade_union_density"]: trade_union,
-                FEATURE_MAPPING["Unemployment rate"]: unemployment,
-                FEATURE_MAPPING["Health"]: health,
-                FEATURE_MAPPING["Education"]: education,
-                FEATURE_MAPPING["Housing"]: housing,
-                FEATURE_MAPPING["Community development"]: community,
-                FEATURE_MAPPING["Productivity"]: productivity,
-                FEATURE_MAPPING["Real interest rates"]: real_interest,
-                FEATURE_MAPPING["Corporate_tax_rate"]: corporate_tax,
-                FEATURE_MAPPING["Inflation"]: inflation,
-                FEATURE_MAPPING["Personal/property tax"]: personal_tax,
-                FEATURE_MAPPING["IRLT"]: irlt,
-                # Add region features with default values
+                # Main features
+                "Population": population,
+                "GDP_per_capita": gdp_per_capita,
+                "Trade_union_density": trade_union,
+                "Unemployment_rate": unemployment,
+                "Health": health,
+                "Education": education,
+                "Housing": housing,
+                "Community_development": community,
+                "Real_interest_rates": real_interest,
+                "Productivity": productivity,
+                "Corporate_tax_rate": corporate_tax,
+                "Inflation": inflation,
+                "Personal_property_tax": personal_tax,
+                "IRLT": irlt,
+                
+                # Region features
                 "Region_East_Asia_and_Pacific": 0,
                 "Region_Europe_and_Central_Asia": 0,
                 "Region_Latin_America_and_Caribbean": 0,
-                "Region_Middle_East_and_North_Africa": 0,
+                "Region_Middle_East_and_North_Africa": 0
             }
             
             backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
