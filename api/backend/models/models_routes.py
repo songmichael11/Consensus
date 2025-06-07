@@ -4,6 +4,13 @@ from mysql.connector import Error
 import numpy as np
 from backend.ml_models.logistic import predict_gini
 
+# OLD_FULL_FEATURES = """Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
+#                        Health, Education, Housing, Community_development, Real_interest_rates,
+#                        Productivity, Corporate_tax_rate, Inflation, Personal_property_tax, IRLT,
+#                        Region_East_Asia_and_Pacific, 
+#                        Region_Europe_and_Central_Asia, Region_Latin_America_and_Caribbean, 
+#                        Region_Middle_East_and_North_Africa"""
+
 FEATURES = """Population, GDP_per_capita, Trade_union_density, Corporate_tax_rate, Education, 
                        Health, Housing, Community_development, IRLT, Unemployment_rate,
                        Inflation, 
@@ -11,7 +18,7 @@ FEATURES = """Population, GDP_per_capita, Trade_union_density, Corporate_tax_rat
                        Region_Europe_and_Central_Asia, Region_Latin_America_and_Caribbean, 
                        Region_Middle_East_and_North_Africa"""
 
-# Real_interest_rates, Productivity, Personal_property_tax,
+# Features which are broken or didn't train properly in the model: Real_interest_rates, Productivity, Personal_property_tax,
 
 # Create a Blueprint for models routes
 models = Blueprint("models", __name__)
@@ -93,21 +100,26 @@ def get_post_predictions(graphID):
         current_app.logger.error(f"Error in gini_plot: {str(e)}")
         return jsonify({"error": str(e)}), 500
     
-# GET request to get a plotly prediction graph for the data playground
-@models.route("/playground/predict", methods=["GET"])
+# POST request to get a plotly prediction graph for the data playground
+@models.route("/playground/predict", methods=["POST"])
 def get_playground_predictions():
     try:
         cursor = db.get_db().cursor()
 
         row = request.get_json()
 
-        # get weights of graph
+        # NOTE: The model was trained with only 15 features (excluding Real_interest_rates, 
+        # Productivity, Personal_property_tax which had problematic training data).
+        # We filter these out before prediction but keep them in the frontend/database
+        # for future use when the model is retrained.
+        
+        # get weights of graph (only for working features)
         cursor.execute(f"""SELECT {FEATURES} 
                        FROM ModelWeights WHERE ModelName = 'Logistic Regression'""")
         weights = list(cursor.fetchone().values())
         current_app.logger.info(weights)
 
-        # get describe metrics
+        # get describe metrics (only for working features)
         cursor.execute(f"""SELECT {FEATURES} FROM PredictMetrics ORDER BY Metric""")
         rows = cursor.fetchall()
         
@@ -126,8 +138,8 @@ def get_playground_predictions():
         x_axis = row["XAxis"]
         x_min = row["XMin"]
         x_max = row["XMax"]
-        x_step = row["XStep"]
-        x_values = np.arange(x_min, x_max + x_step, x_step)
+        num_steps = int(row["XStep"])  # XStep is actually num steps not stepsize
+        x_values = np.linspace(x_min, x_max, num_steps)
 
         gini_values = []
 
@@ -142,6 +154,12 @@ def get_playground_predictions():
             x_input.pop("XMin", None)
             x_input.pop("XMax", None)
             x_input.pop("XStep", None)
+
+            # IMPORTANT: Filter out broken features before calling the ML model
+            # Remove Real_interest_rates, Productivity, Personal_property_tax temporarily
+            x_input.pop("Real_interest_rates", None)
+            x_input.pop("Productivity", None) 
+            x_input.pop("Personal_property_tax", None)
 
             x_input = list(x_input.values())
 
