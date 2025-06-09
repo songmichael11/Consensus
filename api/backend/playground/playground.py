@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, current_app
 from backend.db_connection import db
 from mysql.connector import Error
 import numpy as np
+from backend.ml_models.logistic import predict_gini
 
 # Create a Blueprint for playground routes
 playground = Blueprint("playground", __name__)
@@ -15,100 +16,7 @@ FEATURE_VARIABLES = [
     'Region_Latin_America_and_Caribbean', 'Region_Middle_East_and_North_Africa'
 ]
 
-# POST request to generate GINI predictions for a graph
-# Example: /playground/generate
-@playground.route("/generate", methods=["POST"])
-def generate_graph():
-    try:
-        current_app.logger.info("Starting generate_graph request")
-        data = request.get_json()
-        
-        # Validate required fields
-        required_fields = ['x_axis', 'x_min', 'x_max', 'x_steps']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({"error": f"Missing required field: {field}"}), 400
-        
-        x_axis = data['x_axis']
-        x_min = float(data['x_min'])
-        x_max = float(data['x_max'])
-        x_steps = int(data['x_steps'])
-        
-        # Validate x_axis is a valid feature variable
-        if x_axis not in FEATURE_VARIABLES:
-            return jsonify({"error": f"Invalid x_axis variable: {x_axis}"}), 400
-        
-        # Validate feature values are provided for all variables
-        feature_values = {}
-        for feature in FEATURE_VARIABLES:
-            if feature in data:
-                try:
-                    feature_values[feature] = float(data[feature])
-                except (ValueError, TypeError):
-                    return jsonify({"error": f"Invalid value for {feature}"}), 400
-            else:
-                return jsonify({"error": f"Missing feature value: {feature}"}), 400
-        
-        # Generate x values based on range and steps
-        if x_steps <= 0:
-            return jsonify({"error": "x_steps must be positive"}), 400
-        
-        if x_min >= x_max:
-            return jsonify({"error": "x_min must be less than x_max"}), 400
-        
-        x_values = np.linspace(x_min, x_max, x_steps)
-        
-        cursor = db.get_db().cursor()
 
-        current_app.logger.info("Executing first query")
-        # get weights of graph
-        cursor.execute("""SELECT COUNT(ModelID)
-                    FROM ModelWeights""")
-        weights = cursor.fetchone()
-
-        # get describe metrics
-        cursor.execute("""SELECT Population, GDP_per_capita, Trade_union_density, Corporate_tax_rate, Education, 
-                    Health, Housing, Community_development, IRLT, Unemployment_rate,
-                    Inflation, Region_East_Asia_and_Pacific, 
-                    Region_Europe_and_Central_Asia, Region_Latin_America_and_Caribbean, 
-                    Region_Middle_East_and_North_Africa FROM PredictMetrics ORDER BY Metric""")
-        rows = cursor.fetchall()
-
-        columns = [col for col in rows[0].keys() if col != 'Metric']
-
-        describe = [
-            [row[col] for col in columns] for row in rows
-            ]
-        
-        # Generate predictions for each x value
-        predictions = []
-        for x_val in x_values:
-            # Create feature vector with x_axis variable set to x_val
-            features = feature_values.copy()
-            features[x_axis] = x_val
-            
-            current_app.logger.info('features: ', list(features.values()))
-            current_app.logger.info('describe: ', describe)
-            current_app.logger.info('weights: ', weights)
-
-            gini_prediction = predict_gini(list(features.values()), describe=describe, weights=weights, model="logistic")
-            
-            predictions.append({
-                'x': float(x_val),
-                'y': float(gini_prediction)
-            })
-        
-        return jsonify({
-            "predictions": predictions,
-            "x_axis": x_axis,
-            "x_min": x_min,
-            "x_max": x_max,
-            "x_steps": x_steps
-        }), 200
-        
-    except Exception as e:
-        current_app.logger.error(f"Error in generate_graph: {str(e)}")
-        return jsonify({"error": str(e)}), 500
 
 # POST request to save a graph to the database
 # Example: /playground/save
@@ -119,7 +27,7 @@ def save_graph():
         data = request.get_json()
         
         # Validate required fields
-        required_fields = ['user_id', 'name', 'x_axis', 'x_min', 'x_max', 'x_steps']
+        required_fields = ['user_id', 'name', 'x_axis', 'x_min', 'x_max', 'x_steps'] # TODO: all fields actually ned to be required
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing required field: {field}"}), 400
@@ -148,7 +56,7 @@ def save_graph():
         
         cursor = db.get_db().cursor()
         
-        # Insert into Graphs table
+        # Insert into Graphs table (stores all features including broken ones for future use)
         insert_graph_query = """
             INSERT INTO Graphs (XAxis, XMin, XMax, XStep, Population, GDP_per_capita, 
                               Trade_union_density, Unemployment_rate, Health, Education, 

@@ -1,8 +1,6 @@
 import numpy as np
-import math
-
 import pandas as pd
-
+import math
 
 def log_regress(X, y, w, alpha = 0.5, max_iter = 1000):
     runalg = True
@@ -32,3 +30,4 @@ def lin_regress(X,y,bias_col=False):
     XTy = np.dot(X.T, y)
     c = np.dot(XTXinv, XTy)
     return c
+
