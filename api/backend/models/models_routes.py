@@ -44,8 +44,6 @@ def get_post_predictions(graphID):
 @models.route("/playground/predict", methods=["POST"])
 def get_playground_predictions():
     try:
-        cursor = db.get_db().cursor()
-
         row = request.get_json()
 
         output = predict_from_features(row)
@@ -55,6 +53,8 @@ def get_playground_predictions():
         current_app.logger.error(f"Error in gini_plot: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+# abstracted prediction function for both routes.
+# takes in a list of feature values and output a jsonified set of outputs
 def predict_from_features(row):
     try:
         cursor = db.get_db().cursor()
