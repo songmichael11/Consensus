@@ -87,10 +87,7 @@ FEATURE_MAPPING = {
     "Housing": "Housing",
     "Community development": "Community_development",
     "Productivity": "Productivity",
-    "Real interest rates": "Real_interest_rates",
-    "Corporate tax rate": "Corporate_tax_rate",
     "Inflation": "Inflation",
-    "Personal/property tax": "Personal_property_tax",
     "IRLT": "IRLT"
 }
 
@@ -106,10 +103,7 @@ PRESETS = {
         "Housing": 5.6,
         "Community_development": 7.2,
         "Productivity": 68.4,
-        "Real_interest_rates": 2.4,
-        "Corporate_tax_rate": 21.0,
         "Inflation": 8.0,
-        "Personal_property_tax": 12.0,
         "IRLT": 0.42
     },
     "France (2022)": {
@@ -122,10 +116,7 @@ PRESETS = {
         "Housing": 6.8,
         "Community_development": 8.1,
         "Productivity": 67.1,
-        "Real_interest_rates": 1.8,
-        "Corporate_tax_rate": 25.0,
         "Inflation": 5.2,
-        "Personal_property_tax": 18.5,
         "IRLT": 0.32
     },
     "Germany (2022)": {
@@ -138,10 +129,7 @@ PRESETS = {
         "Housing": 6.2,
         "Community_development": 8.3,
         "Productivity": 71.9,
-        "Real_interest_rates": 1.5,
-        "Corporate_tax_rate": 29.9,
         "Inflation": 6.9,
-        "Personal_property_tax": 14.8,
         "IRLT": 0.29
     }
 }
@@ -316,7 +304,7 @@ with col1:
     # Feature buttons — 4x4 grid to accommodate all features
     with st.expander("ADVANCED MODE"):
         st.markdown("### Feature Variables:")
-        feature_cols = st.columns(4)
+        feature_cols = st.columns(3)
 
         # Determine default values (priority: loaded graph > selected preset > hardcoded defaults)
         loaded_graph = st.session_state.get('loaded_graph', None)
@@ -360,26 +348,19 @@ with col1:
                                     key="community")
 
         with feature_cols[2]:
-            productivity = st.number_input("Productivity:", 
-                                        value=get_default_value('Productivity', 95.0), 
-                                        key="productivity")
-            real_interest = st.number_input("Real interest rates:", 
-                                        value=get_default_value('Real_interest_rates', 2.5), 
-                                        key="real_interest")
             corporate_tax = st.number_input("Corporate tax rate:", 
                                         value=get_default_value('Corporate_tax_rate', 21), 
                                         key="corporate_tax")
             inflation = st.number_input("Inflation:", 
                                     value=get_default_value('Inflation', 2.1), 
                                     key="inflation")
-
-        with feature_cols[3]:
-            personal_tax = st.number_input("Personal/property tax:", 
-                                        value=get_default_value('Personal_property_tax', 15), 
-                                        key="personal_tax")
             irlt = st.number_input("IRLT:", 
                                 value=get_default_value('IRLT', 0.0), 
-                                key="irlt")
+                                key="irlt")            
+            region = st.selectbox("Region:", options=["East Asia and Pacific", 
+                                                      "Europe and Central Asia", 
+                                                      "Latin America and Caribbean", 
+                                                      "Middle East and North Africa"])
             # Add some spacing for visual balance
             st.markdown("")
             st.markdown("")
@@ -433,11 +414,8 @@ with col3:
                 "Education": education,
                 "Housing": housing,
                 "Community_development": community,
-                "Productivity": productivity,
-                "Real_interest_rates": real_interest,
                 "Corporate_tax_rate": corporate_tax,
                 "Inflation": inflation,
-                "Personal_property_tax": personal_tax,
                 "IRLT": irlt,
                 
                 # Region features
@@ -490,11 +468,8 @@ with col3:
                 "Education": education,
                 "Housing": housing,
                 "Community_development": community,
-                "Real_interest_rates": real_interest,
-                "Productivity": productivity,
                 "Corporate_tax_rate": corporate_tax,
                 "Inflation": inflation,
-                "Personal_property_tax": personal_tax,
                 "IRLT": irlt,
                 
                 # Region features
