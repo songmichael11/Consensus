@@ -296,7 +296,7 @@ else:
     st.image("assets/posts/placeholderGraph.gif", caption="GINI vs Population (example)")
 
 # Columns for presets + controls
-col1, col2, col3 = st.columns([0.75, 0.05, 0.2])
+col1, col2, col3 = st.columns([0.75, 0.05, 0.8])
 
 with col1:
     st.markdown("### Presets:")
@@ -314,74 +314,75 @@ with col1:
     st.markdown("")
 
     # Feature buttons — 4x4 grid to accommodate all features
-    st.markdown("### Feature Variables:")
-    feature_cols = st.columns(4)
+    with st.expander("ADVANCED MODE"):
+        st.markdown("### Feature Variables:")
+        feature_cols = st.columns(4)
 
-    # Determine default values (priority: loaded graph > selected preset > hardcoded defaults)
-    loaded_graph = st.session_state.get('loaded_graph', None)
-    selected_preset_data = st.session_state.get('selected_preset', None)
-    
-    def get_default_value(feature_key, fallback_default):
-        """Get default value with priority: loaded graph > preset > fallback"""
-        if loaded_graph and 'features' in loaded_graph:
-            return loaded_graph['features'].get(feature_key, fallback_default)
-        elif selected_preset_data:
-            return selected_preset_data.get(feature_key, fallback_default)
-        else:
-            return fallback_default
+        # Determine default values (priority: loaded graph > selected preset > hardcoded defaults)
+        loaded_graph = st.session_state.get('loaded_graph', None)
+        selected_preset_data = st.session_state.get('selected_preset', None)
+        
+        def get_default_value(feature_key, fallback_default):
+            """Get default value with priority: loaded graph > preset > fallback"""
+            if loaded_graph and 'features' in loaded_graph:
+                return loaded_graph['features'].get(feature_key, fallback_default)
+            elif selected_preset_data:
+                return selected_preset_data.get(feature_key, fallback_default)
+            else:
+                return fallback_default
 
-    with feature_cols[0]:
-        population = st.number_input("Population:", 
-                                   value=get_default_value('Population', 300000000), 
-                                   key="population")
-        gdp_per_capita = st.number_input("GDP per capita:", 
-                                       value=get_default_value('GDP_per_capita', 50000), 
-                                       key="gdp_per_capita")
-        trade_union = st.number_input("Trade union density:", 
-                                    value=get_default_value('Trade_union_density', 10.5), 
-                                    key="trade_union")
-        unemployment = st.number_input("Unemployment rate:", 
-                                     value=get_default_value('Unemployment_rate', 5.2), 
-                                     key="unemployment")
+        with feature_cols[0]:
+            population = st.number_input("Population:", 
+                                    value=get_default_value('Population', 300000000), 
+                                    key="population")
+            gdp_per_capita = st.number_input("GDP per capita:", 
+                                        value=get_default_value('GDP_per_capita', 50000), 
+                                        key="gdp_per_capita")
+            trade_union = st.number_input("Trade union density:", 
+                                        value=get_default_value('Trade_union_density', 10.5), 
+                                        key="trade_union")
+            unemployment = st.number_input("Unemployment rate:", 
+                                        value=get_default_value('Unemployment_rate', 5.2), 
+                                        key="unemployment")
 
-    with feature_cols[1]:
-        health = st.number_input("Health:", 
-                               value=get_default_value('Health', 8.0), 
-                               key="health")
-        education = st.number_input("Education:", 
-                                  value=get_default_value('Education', 7.5), 
-                                  key="education")
-        housing = st.number_input("Housing:", 
-                                value=get_default_value('Housing', 6.8), 
-                                key="housing")
-        community = st.number_input("Community development:", 
-                                  value=get_default_value('Community_development', 7.2), 
-                                  key="community")
+        with feature_cols[1]:
+            health = st.number_input("Health:", 
+                                value=get_default_value('Health', 8.0), 
+                                key="health")
+            education = st.number_input("Education:", 
+                                    value=get_default_value('Education', 7.5), 
+                                    key="education")
+            housing = st.number_input("Housing:", 
+                                    value=get_default_value('Housing', 6.8), 
+                                    key="housing")
+            community = st.number_input("Community development:", 
+                                    value=get_default_value('Community_development', 7.2), 
+                                    key="community")
 
-    with feature_cols[2]:
-        productivity = st.number_input("Productivity:", 
-                                     value=get_default_value('Productivity', 95.0), 
-                                     key="productivity")
-        real_interest = st.number_input("Real interest rates:", 
-                                      value=get_default_value('Real_interest_rates', 2.5), 
-                                      key="real_interest")
-        corporate_tax = st.number_input("Corporate tax rate:", 
-                                      value=get_default_value('Corporate_tax_rate', 21), 
-                                      key="corporate_tax")
-        inflation = st.number_input("Inflation:", 
-                                  value=get_default_value('Inflation', 2.1), 
-                                  key="inflation")
+        with feature_cols[2]:
+            productivity = st.number_input("Productivity:", 
+                                        value=get_default_value('Productivity', 95.0), 
+                                        key="productivity")
+            real_interest = st.number_input("Real interest rates:", 
+                                        value=get_default_value('Real_interest_rates', 2.5), 
+                                        key="real_interest")
+            corporate_tax = st.number_input("Corporate tax rate:", 
+                                        value=get_default_value('Corporate_tax_rate', 21), 
+                                        key="corporate_tax")
+            inflation = st.number_input("Inflation:", 
+                                    value=get_default_value('Inflation', 2.1), 
+                                    key="inflation")
 
-    with feature_cols[3]:
-        personal_tax = st.number_input("Personal/property tax:", 
-                                     value=get_default_value('Personal_property_tax', 15), 
-                                     key="personal_tax")
-        irlt = st.number_input("IRLT:", 
-                             value=get_default_value('IRLT', 0.0), 
-                             key="irlt")
-        # Add some spacing for visual balance
-        st.markdown("")
-        st.markdown("")
+        with feature_cols[3]:
+            personal_tax = st.number_input("Personal/property tax:", 
+                                        value=get_default_value('Personal_property_tax', 15), 
+                                        key="personal_tax")
+            irlt = st.number_input("IRLT:", 
+                                value=get_default_value('IRLT', 0.0), 
+                                key="irlt")
+            # Add some spacing for visual balance
+            st.markdown("")
+            st.markdown("")
 
 with col3:
     st.markdown("### Currently Comparing:")
@@ -527,3 +528,4 @@ with col3:
         if 'loaded_graph' in st.session_state:
             del st.session_state.loaded_graph
         st.rerun()
+
