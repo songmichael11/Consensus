@@ -25,33 +25,29 @@ INSERT INTO Graphs (
     XAxis, XMin, XMax, XStep,
     Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
     Health, Education, Housing, Community_development,
-    Real_interest_rates, Productivity, Corporate_tax_rate, Inflation, Personal_property_tax,
-    IRLT,
+    Corporate_tax_rate, Inflation, IRLT,
     Region_East_Asia_and_Pacific,
     Region_Europe_and_Central_Asia,
     Region_Latin_America_and_Caribbean,
     Region_Middle_East_and_North_Africa
 )
 VALUES
-    ('GDP_per_capita', 0, 100000, 1000,
+    ('GDP_per_capita', 0, 100000, 10,
      0, 0, 0, 0,
      0, 0, 0, 0,
-     0, 0, 0, 0, 0,
-     0,
+     0, 0, 0, 
      0, 0, 0, 0),
      
-    ('Unemployment_rate', 0, 50, 1,
+    ('Unemployment_rate', 0, 50, 5,
      0, 0, 0, 0,
      0, 0, 0, 0,
-     0, 0, 0, 0, 0,
-     0,
+     0, 0, 0, 
      0, 0, 0, 0),
      
-    ('Inflation', 0, 20, 0.5,
+    ('Inflation', 0, 20, 20,
      0, 0, 0, 0,
      0, 0, 0, 0,
-     0, 0, 0, 0, 0,
-     0,
+     0, 0, 0, 
      0, 0, 0, 0);
 
 

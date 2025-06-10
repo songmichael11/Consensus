@@ -87,30 +87,28 @@ FEATURE_MAPPING = {
     "Housing": "Housing",
     "Community development": "Community_development",
     "Productivity": "Productivity",
-    "Real interest rates": "Real_interest_rates",
-    "Corporate tax rate": "Corporate_tax_rate",
     "Inflation": "Inflation",
-    "Personal/property tax": "Personal_property_tax",
     "IRLT": "IRLT"
 }
 
 # Global presets data - hardcoded for simplicity and performance
 PRESETS = {
-    "USA (2022)": {
+    "China (2022)": {
         "Population": 331900000,
         "GDP_per_capita": 70248,
-        "Trade_union_density": 10.3,
+        "Trade_union_density": 32,
         "Unemployment_rate": 3.6,
         "Health": 8.8,
         "Education": 6.0,
         "Housing": 5.6,
         "Community_development": 7.2,
         "Productivity": 68.4,
-        "Real_interest_rates": 2.4,
-        "Corporate_tax_rate": 21.0,
         "Inflation": 8.0,
-        "Personal_property_tax": 12.0,
-        "IRLT": 0.42
+        "IRLT": 0.42,
+        "Region_East_Asia_and_Pacific":1,
+        "Region_Europe_and_Central_Asia":0,
+        "Region_Latin_America_and_Caribbean":0,
+        "Region_Middle_East_and_North_Africa":0
     },
     "France (2022)": {
         "Population": 67750000,
@@ -122,11 +120,12 @@ PRESETS = {
         "Housing": 6.8,
         "Community_development": 8.1,
         "Productivity": 67.1,
-        "Real_interest_rates": 1.8,
-        "Corporate_tax_rate": 25.0,
         "Inflation": 5.2,
-        "Personal_property_tax": 18.5,
-        "IRLT": 0.32
+        "IRLT": 0.32,
+        "Region_East_Asia_and_Pacific":0,
+        "Region_Europe_and_Central_Asia":1,
+        "Region_Latin_America_and_Caribbean":0,
+        "Region_Middle_East_and_North_Africa":0
     },
     "Germany (2022)": {
         "Population": 83200000,
@@ -138,15 +137,14 @@ PRESETS = {
         "Housing": 6.2,
         "Community_development": 8.3,
         "Productivity": 71.9,
-        "Real_interest_rates": 1.5,
-        "Corporate_tax_rate": 29.9,
         "Inflation": 6.9,
-        "Personal_property_tax": 14.8,
-        "IRLT": 0.29
+        "IRLT": 0.29,
+        "Region_East_Asia_and_Pacific":1,
+        "Region_Europe_and_Central_Asia":1,
+        "Region_Latin_America_and_Caribbean":0,
+        "Region_Middle_East_and_North_Africa":0
     }
 }
-
-
 
 def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
     """Generate real GINI predictions using the actual model in the backend API"""
@@ -159,7 +157,7 @@ def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
             "XStep": steps,  # Send number of steps directly
             **feature_values  # Include all feature values
         }
-        
+
         # Make the API call to the models endpoint
         response = requests.post(f"{API_BASE_URL}/models/playground/predict", json=data, timeout=10)
         
@@ -176,6 +174,19 @@ def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
     except requests.exceptions.RequestException as e:
         st.error(f"Error connecting to backend: {str(e)}")
         return None, None
+
+# maps regions of selectbox into region variables that can be input into graph data
+# not sure if this is the most efficient way but it works
+def map_regions(region):
+    regions = {"East Asia and Pacific": 0,
+               "Europe and Central Asia": 0,
+               "Latin America and Caribbean": 0,
+               "Middle East and North Africa": 0}
+    regions[region] = 1
+    return (regions["East Asia and Pacific"], 
+            regions["Europe and Central Asia"], 
+            regions["Latin America and Caribbean"], 
+            regions["Middle East and North Africa"])
 
 # Initialize session state
 if 'graph_data' not in st.session_state:
@@ -217,10 +228,8 @@ if st.session_state.available_features is None:
             # Fallback to hardcoded features if backend is unavailable
             st.session_state.available_features = list(FEATURE_MAPPING.keys())
             st.warning("⚠️ Backend unavailable - using default features")
-# NOTE: ----------------------^^^^^^^^^^^^^^^^^^^^ Is this fetching of features from the backend necessary?
 
 
-# NOTE: vvvvvvvvvvvvvvvv Very cool but do we need for rn 
 # Show current user info in sidebar
 with st.sidebar:
     st.markdown("### 👤 Current User")
@@ -316,7 +325,8 @@ with col1:
     # Feature buttons — 4x4 grid to accommodate all features
     with st.expander("ADVANCED MODE"):
         st.markdown("### Feature Variables:")
-        feature_cols = st.columns(4)
+        feature_cols = st.columns(3)
+
 
         # Determine default values (priority: loaded graph > selected preset > hardcoded defaults)
         loaded_graph = st.session_state.get('loaded_graph', None)
@@ -360,26 +370,20 @@ with col1:
                                     key="community")
 
         with feature_cols[2]:
-            productivity = st.number_input("Productivity:", 
-                                        value=get_default_value('Productivity', 95.0), 
-                                        key="productivity")
-            real_interest = st.number_input("Real interest rates:", 
-                                        value=get_default_value('Real_interest_rates', 2.5), 
-                                        key="real_interest")
             corporate_tax = st.number_input("Corporate tax rate:", 
                                         value=get_default_value('Corporate_tax_rate', 21), 
                                         key="corporate_tax")
             inflation = st.number_input("Inflation:", 
                                     value=get_default_value('Inflation', 2.1), 
                                     key="inflation")
-
-        with feature_cols[3]:
-            personal_tax = st.number_input("Personal/property tax:", 
-                                        value=get_default_value('Personal_property_tax', 15), 
-                                        key="personal_tax")
             irlt = st.number_input("IRLT:", 
                                 value=get_default_value('IRLT', 0.0), 
-                                key="irlt")
+                                key="irlt")            
+            region = st.selectbox("Region:", options=["East Asia and Pacific", 
+                                                      "Europe and Central Asia", 
+                                                      "Latin America and Caribbean", 
+                                                      "Middle East and North Africa"])
+            east_asia, europe, latin_america, middle_east = map_regions(region)
             # Add some spacing for visual balance
             st.markdown("")
             st.markdown("")
@@ -433,18 +437,15 @@ with col3:
                 "Education": education,
                 "Housing": housing,
                 "Community_development": community,
-                "Productivity": productivity,
-                "Real_interest_rates": real_interest,
                 "Corporate_tax_rate": corporate_tax,
                 "Inflation": inflation,
-                "Personal_property_tax": personal_tax,
                 "IRLT": irlt,
                 
                 # Region features
-                "Region_East_Asia_and_Pacific": 0,
-                "Region_Europe_and_Central_Asia": 0,
-                "Region_Latin_America_and_Caribbean": 0,
-                "Region_Middle_East_and_North_Africa": 0
+                "Region_East_Asia_and_Pacific": east_asia,
+                "Region_Europe_and_Central_Asia": europe,
+                "Region_Latin_America_and_Caribbean": latin_america,
+                "Region_Middle_East_and_North_Africa": middle_east
             }
             
 
@@ -490,18 +491,15 @@ with col3:
                 "Education": education,
                 "Housing": housing,
                 "Community_development": community,
-                "Real_interest_rates": real_interest,
-                "Productivity": productivity,
                 "Corporate_tax_rate": corporate_tax,
                 "Inflation": inflation,
-                "Personal_property_tax": personal_tax,
                 "IRLT": irlt,
                 
                 # Region features
-                "Region_East_Asia_and_Pacific": 0,
-                "Region_Europe_and_Central_Asia": 0,
-                "Region_Latin_America_and_Caribbean": 0,
-                "Region_Middle_East_and_North_Africa": 0
+                "Region_East_Asia_and_Pacific": east_asia,
+                "Region_Europe_and_Central_Asia": europe,
+                "Region_Latin_America_and_Caribbean": latin_america,
+                "Region_Middle_East_and_North_Africa": middle_east
             }
             
             backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
