@@ -1,7 +1,7 @@
 import pandas as pd
 
 #insert statements for model weights
-df = pd.read_csv("ml-src/model_weights.csv")
+df = pd.read_csv("ml_src/model_weights.csv")
 columns = list(df.columns)
 columns_sql = ", ".join(columns)
 
@@ -21,7 +21,7 @@ with open("database-files/02_insert_model_weights.sql", "w") as f:
         f.write(insert_stmt)
 
 #insert statements for model mean and std
-df = pd.read_csv("ml-src/describe.csv")
+df = pd.read_csv("ml_src/describe.csv")
 columns = list(df.columns)
 columns_sql = ", ".join(columns)
 

@@ -10,8 +10,8 @@ playground = Blueprint("playground", __name__)
 # List of all feature variables from the database schema
 FEATURE_VARIABLES = [
     'Population', 'GDP_per_capita', 'Trade_union_density', 'Unemployment_rate',
-    'Health', 'Education', 'Housing', 'Community_development', 'Real_interest_rates',
-    'Productivity', 'Corporate_tax_rate', 'Inflation', 'Personal_property_tax', 'IRLT',
+    'Health', 'Education', 'Housing', 'Community_development',
+    'Corporate_tax_rate', 'Inflation', 'IRLT',
     'Region_East_Asia_and_Pacific', 'Region_Europe_and_Central_Asia', 
     'Region_Latin_America_and_Caribbean', 'Region_Middle_East_and_North_Africa'
 ]
