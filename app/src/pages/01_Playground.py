@@ -93,10 +93,10 @@ FEATURE_MAPPING = {
 
 # Global presets data - hardcoded for simplicity and performance
 PRESETS = {
-    "USA (2022)": {
+    "China (2022)": {
         "Population": 331900000,
         "GDP_per_capita": 70248,
-        "Trade_union_density": 10.3,
+        "Trade_union_density": 32,
         "Unemployment_rate": 3.6,
         "Health": 8.8,
         "Education": 6.0,
@@ -104,7 +104,11 @@ PRESETS = {
         "Community_development": 7.2,
         "Productivity": 68.4,
         "Inflation": 8.0,
-        "IRLT": 0.42
+        "IRLT": 0.42,
+        "Region_East_Asia_and_Pacific":1,
+        "Region_Europe_and_Central_Asia":0,
+        "Region_Latin_America_and_Caribbean":0,
+        "Region_Middle_East_and_North_Africa":0
     },
     "France (2022)": {
         "Population": 67750000,
@@ -117,7 +121,11 @@ PRESETS = {
         "Community_development": 8.1,
         "Productivity": 67.1,
         "Inflation": 5.2,
-        "IRLT": 0.32
+        "IRLT": 0.32,
+        "Region_East_Asia_and_Pacific":0,
+        "Region_Europe_and_Central_Asia":1,
+        "Region_Latin_America_and_Caribbean":0,
+        "Region_Middle_East_and_North_Africa":0
     },
     "Germany (2022)": {
         "Population": 83200000,
@@ -130,11 +138,13 @@ PRESETS = {
         "Community_development": 8.3,
         "Productivity": 71.9,
         "Inflation": 6.9,
-        "IRLT": 0.29
+        "IRLT": 0.29,
+        "Region_East_Asia_and_Pacific":1,
+        "Region_Europe_and_Central_Asia":1,
+        "Region_Latin_America_and_Caribbean":0,
+        "Region_Middle_East_and_North_Africa":0
     }
 }
-
-
 
 def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
     """Generate real GINI predictions using the actual model in the backend API"""
@@ -147,7 +157,7 @@ def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
             "XStep": steps,  # Send number of steps directly
             **feature_values  # Include all feature values
         }
-        
+
         # Make the API call to the models endpoint
         response = requests.post(f"{API_BASE_URL}/models/playground/predict", json=data, timeout=10)
         
@@ -164,6 +174,19 @@ def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
     except requests.exceptions.RequestException as e:
         st.error(f"Error connecting to backend: {str(e)}")
         return None, None
+
+# maps regions of selectbox into region variables that can be input into graph data
+# not sure if this is the most efficient way but it works
+def map_regions(region):
+    regions = {"East Asia and Pacific": 0,
+               "Europe and Central Asia": 0,
+               "Latin America and Caribbean": 0,
+               "Middle East and North Africa": 0}
+    regions[region] = 1
+    return (regions["East Asia and Pacific"], 
+            regions["Europe and Central Asia"], 
+            regions["Latin America and Caribbean"], 
+            regions["Middle East and North Africa"])
 
 # Initialize session state
 if 'graph_data' not in st.session_state:
@@ -205,10 +228,8 @@ if st.session_state.available_features is None:
             # Fallback to hardcoded features if backend is unavailable
             st.session_state.available_features = list(FEATURE_MAPPING.keys())
             st.warning("⚠️ Backend unavailable - using default features")
-# NOTE: ----------------------^^^^^^^^^^^^^^^^^^^^ Is this fetching of features from the backend necessary?
 
 
-# NOTE: vvvvvvvvvvvvvvvv Very cool but do we need for rn 
 # Show current user info in sidebar
 with st.sidebar:
     st.markdown("### 👤 Current User")
@@ -361,6 +382,8 @@ with col1:
                                                       "Europe and Central Asia", 
                                                       "Latin America and Caribbean", 
                                                       "Middle East and North Africa"])
+            east_asia, europe, latin_america, middle_east = map_regions(region)
+            
             # Add some spacing for visual balance
             st.markdown("")
             st.markdown("")
@@ -419,10 +442,10 @@ with col3:
                 "IRLT": irlt,
                 
                 # Region features
-                "Region_East_Asia_and_Pacific": 0,
-                "Region_Europe_and_Central_Asia": 0,
-                "Region_Latin_America_and_Caribbean": 0,
-                "Region_Middle_East_and_North_Africa": 0
+                "Region_East_Asia_and_Pacific": east_asia,
+                "Region_Europe_and_Central_Asia": europe,
+                "Region_Latin_America_and_Caribbean": latin_america,
+                "Region_Middle_East_and_North_Africa": middle_east
             }
             
 
@@ -473,10 +496,10 @@ with col3:
                 "IRLT": irlt,
                 
                 # Region features
-                "Region_East_Asia_and_Pacific": 0,
-                "Region_Europe_and_Central_Asia": 0,
-                "Region_Latin_America_and_Caribbean": 0,
-                "Region_Middle_East_and_North_Africa": 0
+                "Region_East_Asia_and_Pacific": east_asia,
+                "Region_Europe_and_Central_Asia": europe,
+                "Region_Latin_America_and_Caribbean": latin_america,
+                "Region_Middle_East_and_North_Africa": middle_east
             }
             
             backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)

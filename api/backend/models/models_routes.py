@@ -45,6 +45,7 @@ def get_post_predictions(graphID):
 def get_playground_predictions():
     try:
         row = request.get_json()
+        current_app.logger.info(row)
 
         output = predict_from_features(row)
         return output
