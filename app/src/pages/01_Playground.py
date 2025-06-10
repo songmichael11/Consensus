@@ -421,7 +421,7 @@ with col1:
                                     step=1.0,
                                     help="Percent increase in general prices in a given year.  \n**No bounds.** **Avg:** 2.1")
             irlt = st.number_input("IRLT:", 
-                                value=get_default_value('IRLT', 0.0), 
+                                value=get_default_value('IRLT', 7.9), 
                                 key="irlt",
                                 min_value=0.0,
                                 max_value=100.0,
