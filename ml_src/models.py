@@ -1,7 +1,5 @@
-326
 import numpy as np
 import math
-
 import pandas as pd
 
 
@@ -33,5 +31,3 @@ def lin_regress(X,y,bias_col=False):
     XTy = np.dot(X.T, y)
     c = np.dot(XTXinv, XTy)
     return c
-
-d
