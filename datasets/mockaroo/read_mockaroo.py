@@ -38,7 +38,7 @@ def insert_graphs():
   return generate_insert_sql("Graphs.csv", "Graphs")
 
 def insert_user_questions():
-  return generate_insert_sql("UserQuestions.csv", "UserQuestions")
+  return generate_insert_sql("Questions.csv", "Questions")
 
 def insert_expert_opinions():
   return generate_insert_sql("ExpertOpinions.csv", "ExpertOpinions")
@@ -46,8 +46,8 @@ def insert_expert_opinions():
 with open("database-files/02_insert.sql", "w") as f:
     f.write("USE Consensus_DB;\n")
     f.write(insert_users())
-    f.write(insert_posts())
     f.write(insert_graphs())
+    f.write(insert_posts())
     f.write(insert_user_questions())
     f.write(insert_expert_opinions())
 
