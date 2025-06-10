@@ -19,6 +19,8 @@ def get_user(user_id):
         current_app.logger.info('Executing queries')
         cursor.execute("SELECT * FROM Users WHERE UserID = %s", (user_id,))
         user = cursor.fetchone()
+
+        current_app.logger.info(user)
         
         cursor.execute("""SELECT RoleType FROM Roles r
                        JOIN RolesUsers ru 

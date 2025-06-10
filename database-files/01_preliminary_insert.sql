@@ -1,10 +1,56 @@
 Use Consensus_DB;
 
-INSERT INTO Users(UserID, Name, PoliticalParty, Bio)
-        VALUES
-        (1, "Prince Maximilian William-Lancelot Robertson III", "People's Party of Europe", "I'm British."),
-        (2, "JT Nance", "Democrat Party", "I did NOT kill the pope"),
-        (3, "Emeka Okonkwo", "Green Party", "Hello! I love the economy.");
+-- INSERT INTO Users(UserID, Name, PoliticalParty, Bio)
+--         VALUES
+--         (1, "Prince Maximilian William-Lancelot Robertson III", "People's Party of Europe", "I'm British."),
+--         (2, "JT Nance", "Democrat Party", "I did NOT kill the pope"),
+--         (3, "Emeka Okonkwo", "Green Party", "Hello! I love the economy.");
+
+
+-- THE MOCK DATA WE HAVE IS FROM CHATGPT
+-- WE ARE GOING TO MOCKAROO DATA AFTER THIS DELIVERABLE
+
+-- INSERT INTO Graphs (
+--     XAxis, XMin, XMax, XStep,
+--     Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
+--     Health, Education, Housing, Community_development,
+--     Corporate_tax_rate, Inflation, IRLT,
+--     Region_East_Asia_and_Pacific,
+--     Region_Europe_and_Central_Asia,
+--     Region_Latin_America_and_Caribbean,
+--     Region_Middle_East_and_North_Africa
+-- )
+-- VALUES
+--     ('GDP_per_capita', 0, 100000, 10,
+--      0, 0, 0, 0,
+--      0, 0, 0, 0,
+--      0, 0, 0, 
+--      0, 0, 0, 0),
+     
+--     ('Unemployment_rate', 0, 50, 5,
+--      0, 0, 0, 0,
+--      0, 0, 0, 0,
+--      0, 0, 0, 
+--      0, 0, 0, 0),
+     
+--     ('Inflation', 0, 20, 20,
+--      0, 0, 0, 0,
+--      0, 0, 0, 0,
+--      0, 0, 0, 
+--      0, 0, 0, 0);
+
+
+-- INSERT INTO Posts (Title, Description, UserID, GraphID, NumUpvotes, NumDownvotes)
+-- VALUES
+--     ('Post 1 Title', 'This is the description of Post 1.', 1, 1, 3, 1),
+--     ('Post 2 Title', 'This is the description of Post 2.', 2, 2, 2, 2),
+--     ('Post 3 Title', 'This is the description of Post 3.', 3, 3, 1, 2),
+--     ('Post 4 Title', 'Exploring new policies in healthcare.', 1, 2, 1, 1),
+--     ('Post 5 Title', 'Debate on climate change strategies.', 2, 3, 2, 1),
+--     ('Post 6 Title', 'Economic impacts of tax reform.', 3, 1, 3, 1),
+--     ('Post 7 Title', 'Education reforms for the next decade.', 1, 3, 1, 2),
+--     ('Post 8 Title', 'Housing market trends and predictions.', 2, 1, 1, 3),
+--     ('Post 9 Title', 'Community engagement and public safety.', 3, 2, 2, 1);
 
 INSERT INTO Roles(RoleType)
         VALUES
@@ -12,57 +58,60 @@ INSERT INTO Roles(RoleType)
         ("Politician"),
         ("Economist");
 
-INSERT INTO RolesUsers(RoleID, UserID)
-        VALUES
-        (1, 1),
-        (2, 2),
-        (3, 3);
+LOAD DATA INFILE 'mockaroo/Users.csv'
+INTO TABLE Users
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
 
--- THE MOCK DATA WE HAVE IS FROM CHATGPT
--- WE ARE GOING TO MOCKAROO DATA AFTER THIS DELIVERABLE
+LOAD DATA INFILE 'mockaroo/Posts.csv'
+INTO TABLE Posts
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
 
-INSERT INTO Graphs (
-    XAxis, XMin, XMax, XStep,
-    Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
-    Health, Education, Housing, Community_development,
-    Corporate_tax_rate, Inflation, IRLT,
-    Region_East_Asia_and_Pacific,
-    Region_Europe_and_Central_Asia,
-    Region_Latin_America_and_Caribbean,
-    Region_Middle_East_and_North_Africa
-)
-VALUES
-    ('GDP_per_capita', 0, 100000, 10,
-     0, 0, 0, 0,
-     0, 0, 0, 0,
-     0, 0, 0, 
-     0, 0, 0, 0),
-     
-    ('Unemployment_rate', 0, 50, 5,
-     0, 0, 0, 0,
-     0, 0, 0, 0,
-     0, 0, 0, 
-     0, 0, 0, 0),
-     
-    ('Inflation', 0, 20, 20,
-     0, 0, 0, 0,
-     0, 0, 0, 0,
-     0, 0, 0, 
-     0, 0, 0, 0);
+LOAD DATA INFILE 'mockaroo/Graphs.csv'
+INTO TABLE Graphs
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
 
+LOAD DATA INFILE 'mockaroo/UserQuestions.csv'
+INTO TABLE UserQuestions
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
 
-INSERT INTO Posts (Title, Description, UserID, GraphID, NumUpvotes, NumDownvotes)
-VALUES
-    ('Post 1 Title', 'This is the description of Post 1.', 1, 1, 3, 1),
-    ('Post 2 Title', 'This is the description of Post 2.', 2, 2, 2, 2),
-    ('Post 3 Title', 'This is the description of Post 3.', 3, 3, 1, 2),
-    ('Post 4 Title', 'Exploring new policies in healthcare.', 1, 2, 1, 1),
-    ('Post 5 Title', 'Debate on climate change strategies.', 2, 3, 2, 1),
-    ('Post 6 Title', 'Economic impacts of tax reform.', 3, 1, 3, 1),
-    ('Post 7 Title', 'Education reforms for the next decade.', 1, 3, 1, 2),
-    ('Post 8 Title', 'Housing market trends and predictions.', 2, 1, 1, 3),
-    ('Post 9 Title', 'Community engagement and public safety.', 3, 2, 2, 1);
+LOAD DATA INFILE 'mockaroo/ExpertOpinions.csv'
+INTO TABLE ExpertOpinions
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
 
+INSERT INTO RolesUsers (RoleID, UserID) VALUES
+  (1, 1),
+  (1, 2),
+  (1, 3),
+  (1, 4),
+  (1, 5),
+  (1, 6),
+  (2, 7),
+  (2, 8),
+  (2, 9),
+  (2, 10),
+  (2, 11),
+  (2, 12),
+  (3, 13),
+  (3, 14),
+  (3, 15),
+  (3, 16),
+  (3, 17),
+  (3, 18);
 
 INSERT INTO UpvotesUsers (UserID, PostID)
 VALUES
@@ -121,3 +170,4 @@ VALUES
     (3, 3),  -- Emeka bookmarked Post 3
     (3, 7),  -- Emeka bookmarked Post 7
     (3, 8);  -- Emeka bookmarked Post 8
+
