@@ -5,7 +5,7 @@ df = pd.read_csv("ml_src/model_weights.csv")
 columns = list(df.columns)
 columns_sql = ", ".join(columns)
 
-with open("database-files/02_insert_model_weights.sql", "w") as f:
+with open("database-files/04_insert_model_weights.sql", "w") as f:
     f.write("USE Consensus_DB; \n")
     for _, row in df.iterrows():
         values = []
@@ -25,7 +25,7 @@ df = pd.read_csv("ml_src/describe.csv")
 columns = list(df.columns)
 columns_sql = ", ".join(columns)
 
-with open("database-files/02_insert_model_weights.sql", "a") as f:
+with open("database-files/04_insert_model_weights.sql", "a") as f:
     for _, row in df.iterrows():
         values = []
         for col in columns:
