@@ -305,7 +305,7 @@ else:
     st.image("assets/posts/placeholderGraph.gif", caption="GINI vs Population (example)")
 
 # Columns for presets + controls
-col1, col2, col3 = st.columns([0.75, 0.05, 0.8])
+col1, col2, col3 = st.columns([0.75, 0.05, 0.4])
 
 with col1:
     st.markdown("### Presets:")
@@ -343,46 +343,96 @@ with col1:
 
         with feature_cols[0]:
             population = st.number_input("Population:", 
-                                    value=get_default_value('Population', 300000000), 
-                                    key="population")
+                                    value=get_default_value('Population', 22000000), 
+                                    key="population", 
+                                    min_value=0,
+                                    step=1000000,
+                                    help="Population of a country.  \n**Min:** 0 **Avg:** 22,000,000")
             gdp_per_capita = st.number_input("GDP per capita:", 
-                                        value=get_default_value('GDP_per_capita', 50000), 
-                                        key="gdp_per_capita")
+                                        value=get_default_value('GDP_per_capita', 41000), 
+                                        key="gdp_per_capita",
+                                        min_value=0,
+                                        step=1000,
+                                        help="GDP divided by population.  \n**Min:** 0 **Avg:** 41,000")
             trade_union = st.number_input("Trade union density:", 
-                                        value=get_default_value('Trade_union_density', 10.5), 
-                                        key="trade_union")
+                                        value=get_default_value('Trade_union_density', 33.0), 
+                                        key="trade_union",
+                                        min_value=0.0,
+                                        max_value=100.0,
+                                        step=1.0,
+                                        format='%.1f',
+                                        help="Percent of workers in a trade union.  \n**Min:** 0 **Max:** 100 **Avg:** 33")
             unemployment = st.number_input("Unemployment rate:", 
-                                        value=get_default_value('Unemployment_rate', 5.2), 
-                                        key="unemployment")
+                                        value=get_default_value('Unemployment_rate', 8.0), 
+                                        key="unemployment",
+                                        min_value=0.0,
+                                        max_value=100.0,
+                                        step=1.0,
+                                        format='%.1f',
+                                        help="Percent of labor force unemployed.  \n**Min:** 0 **Max:** 100 **Avg:** 8")
 
         with feature_cols[1]:
             health = st.number_input("Health:", 
-                                value=get_default_value('Health', 8.0), 
-                                key="health")
+                                value=get_default_value('Health', .064), 
+                                key="health",
+                                min_value=0.0,
+                                max_value=1.0,
+                                step=.01,
+                                format='%.4f',
+                                help="Share of GDP spent by government on health.  \n**Min:** 0 **Max:** 1 **Avg:** .064")
             education = st.number_input("Education:", 
-                                    value=get_default_value('Education', 7.5), 
-                                    key="education")
+                                    value=get_default_value('Education', .052), 
+                                    key="education",
+                                    min_value=0.0,
+                                    max_value=1.0,
+                                    step=.01,
+                                    format='%.4f',
+                                    help="Share of GDP spent by government on education.  \n**Min:** 0 **Max:** 1 **Avg:** .052")
             housing = st.number_input("Housing:", 
-                                    value=get_default_value('Housing', 6.8), 
-                                    key="housing")
+                                    value=get_default_value('Housing', .0032), 
+                                    key="housing",
+                                    min_value=0.0,
+                                    max_value=1.0,
+                                    step=.001,
+                                    format='%.4f',
+                                    help="Share of GDP spent by government on housing.  \n**Min:** 0 **Max:** 1 **Avg:** .0032")
             community = st.number_input("Community development:", 
-                                    value=get_default_value('Community_development', 7.2), 
-                                    key="community")
+                                    value=get_default_value('Community_development', .0019), 
+                                    key="community",
+                                    min_value=0.0,
+                                    max_value=1.0,
+                                    step=.001,
+                                    format='%.4f',
+                                    help="Share of GDP spent by government on community development.  \n**Min:** 0 **Max:** 1 **Avg:** .0019")
 
         with feature_cols[2]:
             corporate_tax = st.number_input("Corporate tax rate:", 
-                                        value=get_default_value('Corporate_tax_rate', 21), 
-                                        key="corporate_tax")
+                                        value=get_default_value('Corporate_tax_rate', 21.0), 
+                                        key="corporate_tax",
+                                        min_value=0.0,
+                                        max_value=100.0,
+                                        step=1.0,
+                                        format='%.1f',
+                                        help="Percent of profits that corporations pay in taxes.  \n**Min:** 0 **Max:** 100 **Avg:** 25")
             inflation = st.number_input("Inflation:", 
                                     value=get_default_value('Inflation', 2.1), 
-                                    key="inflation")
+                                    key="inflation",
+                                    format='%.1f',
+                                    step=1.0,
+                                    help="Percent increase in general prices in a given year.  \n**No bounds.** **Avg:** 2.1")
             irlt = st.number_input("IRLT:", 
                                 value=get_default_value('IRLT', 0.0), 
-                                key="irlt")            
+                                key="irlt",
+                                min_value=0.0,
+                                max_value=100.0,
+                                step=1.0,
+                                format='%.1f',
+                                help="Percent interest paid on long-term bonds and loans.  \n**Min:** 0 **Max:** 100 **Avg:** 3.5")   
             region = st.selectbox("Region:", options=["East Asia and Pacific", 
                                                       "Europe and Central Asia", 
                                                       "Latin America and Caribbean", 
-                                                      "Middle East and North Africa"])
+                                                      "Middle East and North Africa"],
+                                    help="Region of the world country is located.")
             east_asia, europe, latin_america, middle_east = map_regions(region)
             # Add some spacing for visual balance
             st.markdown("")
