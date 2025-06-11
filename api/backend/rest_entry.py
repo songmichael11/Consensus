@@ -7,6 +7,7 @@ from logging.handlers import RotatingFileHandler
 from backend.db_connection import db
 from backend.landing.landing_routes import landing
 from backend.post_utils.post_utils import post_utils
+from backend.expanded_post.expanded_post_routes import expanded_post
 from backend.feed.feed_routes import feed
 from backend.playground.playground import playground
 from backend.models.models_routes import models
@@ -50,6 +51,7 @@ def create_app():
     app.logger.info("create_app(): registering blueprints with Flask app object.")
     app.register_blueprint(landing, url_prefix="/landing")
     app.register_blueprint(post_utils, url_prefix="/post_utils")
+    app.register_blueprint(expanded_post, url_prefix="/expanded_post")
     app.register_blueprint(feed, url_prefix="/feed")
     app.register_blueprint(playground, url_prefix="/playground")
     app.register_blueprint(models, url_prefix="/models")

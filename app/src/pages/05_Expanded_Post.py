@@ -126,7 +126,7 @@ def renderQuestions(post):
             st.write(f"{question['QuestionText']}")
 
 def getPostByID(post_id, user_id):
-    url = f"http://web-api:4000/feed/post/{post_id}/{user_id}"
+    url = f"http://web-api:4000/expanded_post/post/{post_id}/{user_id}"
     response = requests.get(url)
     return response.json()
 
