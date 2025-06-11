@@ -56,6 +56,7 @@ def renderBookmarkButton(post, mode="default"):
         else:
             response = updatePostUtils("put", "bookmark", post["PostID"], user_id)
 
+        st.write(response.status_code)
         if response.status_code == 200:
             st.rerun()
 
