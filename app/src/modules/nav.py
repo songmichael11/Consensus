@@ -58,7 +58,7 @@ def AdminPageNav():
     )
 
 def FeedNav():
-    st.sidebar.page_link("pages/00_Feed_Page.py", label="My Feed")
+    st.sidebar.page_link("pages/00_Feed.py", label="My Feed")
 
 def PlaygroundNav():
     st.sidebar.page_link("pages/01_Playground.py", label="Data Playground")
