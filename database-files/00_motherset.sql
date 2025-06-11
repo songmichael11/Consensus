@@ -80,6 +80,27 @@ CREATE TABLE PredictMetrics (
     DateAdded DATETIME DEFAULT NOW()
 );
 
+CREATE TABLE TrainingData (
+    DataID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Time_period INT NOT NULL,
+    Reference_area VARCHAR(15),
+    Country_code VARCHAR(10),
+    Population FLOAT NOT NULL,
+    GDP_per_capita FLOAT NOT NULL,
+    Trade_union_density FLOAT NOT NULL,
+    Unemployment_rate FLOAT NOT NULL,
+    Health FLOAT NOT NULL,
+    Education FLOAT NOT NULL,
+    Housing FLOAT NOT NULL,
+    Community_development FLOAT NOT NULL,
+    Corporate_tax_rate FLOAT NOT NULL,
+    Inflation FLOAT NOT NULL,
+    IRLT FLOAT NOT NULL,
+    Gini FLOAT NOT NULL,
+    Region VARCHAR(50) NOT NULL,
+    DateAdded DATETIME DEFAULT NOW()
+);
+
 CREATE TABLE Posts (
     PostID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     Title VARCHAR(255) NOT NULL,
