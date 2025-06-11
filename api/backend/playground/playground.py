@@ -250,3 +250,42 @@ def get_features():
     except Exception as e:
         current_app.logger.error(f"Error in get_features: {str(e)}")
         return jsonify({"error": str(e)}), 500
+    
+# GET request to load presets in construction of data playground page
+# Example: /presets
+@playground.route("/presets", methods=["GET"])
+def get_presets():
+    try:
+        current_app.logger.info("Starting get_presets request")
+        
+        cursor = db.get_db().cursor()
+        
+        # Select the most recent year for each country in our training set
+        preset_query = """
+            SELECT * 
+            FROM TrainingData
+            WHERE DataID IN (
+                SELECT MAX(DataID)
+                FROM TrainingData 
+                GROUP BY Country_code
+            )
+            GROUP BY Country_code
+        """
+        
+        cursor.execute(preset_query)
+        preset_values = cursor.fetchall()
+        
+        cursor.close()
+        
+        current_app.logger.info(f"Successfully executed query to grab preset values")
+        return jsonify({
+            "message": "preset grabbing function for data playground executed",
+            "data": preset_values
+        }), 201
+        
+    except Error as e:
+        current_app.logger.error(f"Database error in get_presets: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        current_app.logger.error(f"Error in get_presets: {str(e)}")
+        return jsonify({"error": str(e)}), 500
