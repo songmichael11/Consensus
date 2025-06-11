@@ -13,7 +13,7 @@ CREATE TABLE Users (
     NumFollowing INT DEFAULT 0
 );
 
-CREATE TABLE Roles (
+CREATE TABLE Roles ( 
     RoleID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     RoleType VARCHAR(50) NOT NULL
 );
@@ -95,7 +95,7 @@ CREATE TABLE Posts (
     FOREIGN KEY (GraphID) REFERENCES Graphs (GraphID)
 );
 
-CREATE TABLE RolesUsers (
+CREATE TABLE RolesUsers ( 
     RoleID INT UNSIGNED,
     UserID INT UNSIGNED,
     PRIMARY KEY (RoleID, UserID),
@@ -105,7 +105,7 @@ CREATE TABLE RolesUsers (
 
 CREATE TABLE Questions (
     QuestionID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    IsHidden BOOLEAN DEFAULT false,
+    IsHidden BOOLEAN DEFAULT true,
     CreatedAt DATETIME DEFAULT NOW(),
     QuestionText TEXT NOT NULL,
     PostID INT UNSIGNED NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE Answers (
     FOREIGN KEY (UserID) REFERENCES Users (UserID)
 );
 
-CREATE TABLE FollowingFollowees (
+CREATE TABLE FollowingFollowees ( 
     FollowerID INT UNSIGNED NOT NULL,
     FolloweeID INT UNSIGNED NOT NULL,
     PRIMARY KEY (FollowerID, FolloweeID),
@@ -149,7 +149,7 @@ CREATE TABLE SavedGraphs (
     FOREIGN KEY (GraphID) REFERENCES Graphs (GraphID)
 );
 
-CREATE TABLE BookmarkedUsers (
+CREATE TABLE BookmarkedUsers ( 
     UserID INT UNSIGNED NOT NULL,
     PostID INT UNSIGNED NOT NULL,
     CreatedAt DATETIME DEFAULT NOW(),
@@ -158,7 +158,7 @@ CREATE TABLE BookmarkedUsers (
     FOREIGN KEY (PostID) REFERENCES Posts (PostID)
 );
 
-CREATE TABLE UpvotesUsers (
+CREATE TABLE UpvotesUsers ( 
     UserID INT UNSIGNED NOT NULL,
     PostID INT UNSIGNED NOT NULL,
     CreatedAt DATETIME DEFAULT NOW(),
@@ -167,7 +167,7 @@ CREATE TABLE UpvotesUsers (
     FOREIGN KEY (PostID) REFERENCES Posts (PostID)
 );
 
-CREATE TABLE DownvotesUsers (
+CREATE TABLE DownvotesUsers ( 
     UserID INT UNSIGNED NOT NULL,
     PostID INT UNSIGNED NOT NULL,
     CreatedAt DATETIME DEFAULT NOW(),
@@ -176,7 +176,7 @@ CREATE TABLE DownvotesUsers (
     FOREIGN KEY (PostID) REFERENCES Posts (PostID)
 );
 
-CREATE TABLE EndorsementsUsers (
+CREATE TABLE EndorsementsUsers ( 
     UserID INT UNSIGNED NOT NULL,
     PostID INT UNSIGNED NOT NULL,
     CreatedAt DATETIME DEFAULT NOW(),

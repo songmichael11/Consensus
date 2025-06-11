@@ -92,8 +92,6 @@ FEATURE_MAPPING = {
     "IRLT": "IRLT"
 }
 
-# PRESETS = get_presets()
-
 # Global presets data - hardcoded for simplicity and performance
 PRESETS = {
     "Norway (2019)": {
