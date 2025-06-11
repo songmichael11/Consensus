@@ -6,18 +6,13 @@ import requests
 from modules.nav import SideBarLinks
 import plotly.graph_objects as go
 
-
-# page setup
-st.set_page_config(layout='wide')
-
-# sidebar
-SideBarLinks()
-
 # load user info from session
 user_id = st.session_state.get('UserID', None)
 if not user_id:
     st.error("No user logged in. Please return to home page and log in.")
     st.stop()
+
+# preset data for selected post
 
 # gets the feed by calling the feed route
 def getFeed(user_id, params):
@@ -52,6 +47,29 @@ def updatePostUtils(type, metric, post_id, user_id):
         return requests.put(url)
     else:
         return requests.delete(url)
+
+# ----------- UI Components ----------
+def renderPlotlyGraph(post):
+    response = requests.get(f"http://web-api:4000/models/posts/predict/{post['GraphID']}")
+    data = response.json()
+    fig = go.Figure(go.Scatter(x=data["x_values"], y=data['predictions'], mode="lines+markers"))
+    fig.update_layout(title_text=f"{data['x_axis']} vs. GINI", 
+                        margin_autoexpand=False,
+                        margin=dict(t=75, b=50, l=10, r=10),
+                        height=325)
+    st.plotly_chart(fig, key=f"plot{post['PostID']}")
+
+
+
+@st.dialog("See More", width="large")
+def expandedPostDialog():
+    st.write(st.session_state["PostID"])
+
+# page setup
+st.set_page_config(layout='wide')
+
+# sidebar
+SideBarLinks()
 
 #page title
 st.markdown(f"### {st.session_state['Roles'][0]} Feed")
@@ -120,6 +138,7 @@ for post in feed:
 
                         if response.status_code == 200:
                             st.rerun()
+
                     st.html(f"<p style='font-size: 30px; text-align: right; margin-right: 60px'>{str(post['karma'])}</p>")
                     if st.button(label=downvoteIcon, key=f'downvote{post["PostID"]}'):
                         if post['downvoted'] == "Downvoted":
@@ -129,19 +148,22 @@ for post in feed:
 
                         if response.status_code == 200:
                             st.rerun()
+
                 with st.container():
                     c1a, c1b = st.columns([0.8, 0.2], vertical_alignment="bottom")
 
                     with c1a:
-                        if st.button(label=endorsedIcon, key=f'endorsement{post["PostID"]}', type='secondary'):
-                            if post['endorsed'] == "Endorsed":
-                                response = updatePostUtils("delete", "endorsement", post["PostID"], user_id)
-                            else:
-                                response = updatePostUtils("put", "endorsement", post["PostID"], user_id)
+                        if "Politician" in st.session_state['Roles']:
+                            if st.button(label=endorsedIcon, key=f'endorsement{post["PostID"]}', type='secondary'):
+                                if post['endorsed'] == "Endorsed":
+                                    response = updatePostUtils("delete", "endorsement", post["PostID"], user_id)
+                                else:
+                                    response = updatePostUtils("put", "endorsement", post["PostID"], user_id)
 
-                            if response.status_code == 200:
-                                st.rerun()
-
+                                if response.status_code == 200:
+                                    st.rerun()
+                        else:
+                            st.html(f"<p style='font-size: 20px; margin-left: 10px; margin-bottom: -5px; margin-right:-5px'>✅</p>")
                     with c1b:
                         st.html(f"<p style='font-size: 15px; text-align: left; margin-left: -30px; margin-bottom: -10px'>{str(post['NumEndorsements'])}</p>")
 
@@ -149,21 +171,23 @@ for post in feed:
             # empty space to vertically center/align
             # st.markdown("<br>" * 4, unsafe_allow_html=True)
 
-            # Title, Author, Description
+            # title, Author, Description
             st.markdown(f"### {post['Title']}")
-            st.markdown(f"**{post['author']}**")
-            st.markdown(post['Description'])
+            st.markdown(f"by **{post['author']}**")
 
-            # Show more
-            st.markdown("**Show more**")
+            # auto truncate description if post is too long
+            if len(post["Description"]) > 100:
+                st.markdown(post["Description"][:200] + "...")
+            else:
+                st.markdown(post['Description'])
+
+            # show more
+            if st.button("**Show more...**", type="tertiary"):
+                expandedPostDialog(post)
 
         with c3:
             # Graph (placeholder image — replace with your GraphID renderer)
-            response = requests.get(f"http://web-api:4000/models/posts/predict/{post['GraphID']}")
-            data = response.json()
-            fig = go.Figure(go.Scatter(x=data["x_values"], y=data['predictions'], mode="lines+markers"))
-            fig.update_layout(title_text=f"{data['x_axis']} vs. GINI", 
-                              margin_autoexpand=False,
-                              margin=dict(t=75, b=50, l=10, r=10),
-                              height=325)
-            st.plotly_chart(fig, key=f"plot{post['PostID']}")
+            renderPlotlyGraph(post)
+
+            # if st.button("Open in Data Playground", key=f"dataPlayground{post['PostID']}"):
+

@@ -328,7 +328,6 @@ with col1:
         st.markdown("### Feature Variables:")
         feature_cols = st.columns(3)
 
-
         # Determine default values (priority: loaded graph > selected preset > hardcoded defaults)
         loaded_graph = st.session_state.get('loaded_graph', None)
         selected_preset_data = st.session_state.get('selected_preset', None)

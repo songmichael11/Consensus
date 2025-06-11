@@ -50,12 +50,12 @@ with b1:
 
 with b2:
     if st.button("Log in as Politician,\nJT Nance", use_container_width=True):
-        updateSessionState(2)
+        updateSessionState(7)
         st.success("Logged in as Politician")
         st.switch_page('pages/00_Feed_Page.py')
 
 with b3:
     if st.button("Log in as Economist,\nEmeka Okonkwo", use_container_width=True):
-        updateSessionState(3)
+        updateSessionState(13)
         st.success("Logged in as Economist")
         st.switch_page('pages/00_Feed_Page.py')
