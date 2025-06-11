@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 from modules.nav import SideBarLinks
+from modules.presets import get_presets
 
 # API Configuration
 API_BASE_URL = "http://web-api:4000"  
@@ -91,58 +92,60 @@ FEATURE_MAPPING = {
     "IRLT": "IRLT"
 }
 
+# PRESETS = get_presets()
+
 # Global presets data - hardcoded for simplicity and performance
 PRESETS = {
-    "China (2022)": {
-        "Population": 331900000,
-        "GDP_per_capita": 70248,
-        "Trade_union_density": 32,
-        "Unemployment_rate": 3.6,
-        "Health": 8.8,
-        "Education": 6.0,
-        "Housing": 5.6,
-        "Community_development": 7.2,
-        "Productivity": 68.4,
-        "Inflation": 8.0,
-        "IRLT": 0.42,
-        "Region_East_Asia_and_Pacific":1,
-        "Region_Europe_and_Central_Asia":0,
-        "Region_Latin_America_and_Caribbean":0,
-        "Region_Middle_East_and_North_Africa":0
+    "Norway (2019)": {
+        "Population": 5347896.0,
+        "GDP_per_capita": 76430.5889473338,
+        "Trade_union_density": 50.400002,
+        "Unemployment_rate": 3.875,
+        "Health": 0.0862369844120149,
+        "Education": 0.0555386430176563,
+        "Housing": 0.0012874843234674,
+        "Community_development": 0.0,
+        "Productivity": None,  # No matching field in provided data
+        "Inflation": 2.16773003305402,
+        "IRLT": 1.49416666666667,
+        "Region_East_Asia_and_Pacific": 0,
+        "Region_Europe_and_Central_Asia": 1,
+        "Region_Latin_America_and_Caribbean": 0,
+        "Region_Middle_East_and_North_Africa": 0
     },
-    "France (2022)": {
-        "Population": 67750000,
-        "GDP_per_capita": 42330,
-        "Trade_union_density": 7.7,
-        "Unemployment_rate": 7.3,
-        "Health": 9.5,
-        "Education": 5.5,
-        "Housing": 6.8,
-        "Community_development": 8.1,
-        "Productivity": 67.1,
-        "Inflation": 5.2,
-        "IRLT": 0.32,
-        "Region_East_Asia_and_Pacific":0,
-        "Region_Europe_and_Central_Asia":1,
-        "Region_Latin_America_and_Caribbean":0,
-        "Region_Middle_East_and_North_Africa":0
+    "Poland (2017)": {
+        "Population": 37974826.0,
+        "GDP_per_capita": 13913.3402919927,
+        "Trade_union_density": 13.4,
+        "Unemployment_rate": 4.95833333333333,
+        "Health": 0.0466635016592139,
+        "Education": 0.048813522992945,
+        "Housing": 0.0003903625535562,
+        "Community_development": 0.000481326458453,
+        "Productivity": None,
+        "Inflation": 2.0759355367385,
+        "IRLT": 3.42,
+        "Region_East_Asia_and_Pacific": 0,
+        "Region_Europe_and_Central_Asia": 1,
+        "Region_Latin_America_and_Caribbean": 0,
+        "Region_Middle_East_and_North_Africa": 0
     },
-    "Germany (2022)": {
-        "Population": 83200000,
-        "GDP_per_capita": 48720,
-        "Trade_union_density": 16.7,
-        "Unemployment_rate": 3.1,
-        "Health": 9.7,
-        "Education": 4.9,
-        "Housing": 6.2,
-        "Community_development": 8.3,
-        "Productivity": 71.9,
-        "Inflation": 6.9,
-        "IRLT": 0.29,
-        "Region_East_Asia_and_Pacific":1,
-        "Region_Europe_and_Central_Asia":1,
-        "Region_Latin_America_and_Caribbean":0,
-        "Region_Middle_East_and_North_Africa":0
+    "Portugal (2016)": {
+        "Population": 10325452.0,
+        "GDP_per_capita": 19980.2808866516,
+        "Trade_union_density": 15.3,
+        "Unemployment_rate": 11.475,
+        "Health": 0.0611153783913612,
+        "Education": 0.0477369580696354,
+        "Housing": 0.0023626903656236,
+        "Community_development": 0.0018257250377291,
+        "Productivity": None,
+        "Inflation": 0.607397074641719,
+        "IRLT": 3.1725,
+        "Region_East_Asia_and_Pacific": 0,
+        "Region_Europe_and_Central_Asia": 1,
+        "Region_Latin_America_and_Caribbean": 0,
+        "Region_Middle_East_and_North_Africa": 0
     }
 }
 
@@ -349,10 +352,10 @@ with col1:
                                     step=1000000,
                                     help="Population of a country.  \n**Min:** 0 **Avg:** 22,000,000")
             gdp_per_capita = st.number_input("GDP per capita:", 
-                                        value=get_default_value('GDP_per_capita', 41000), 
+                                        value=get_default_value('GDP_per_capita', 41000.0), 
                                         key="gdp_per_capita",
-                                        min_value=0,
-                                        step=1000,
+                                        min_value=0.0,
+                                        step=1000.0,
                                         help="GDP divided by population.  \n**Min:** 0 **Avg:** 41,000")
             trade_union = st.number_input("Trade union density:", 
                                         value=get_default_value('Trade_union_density', 33.0), 
