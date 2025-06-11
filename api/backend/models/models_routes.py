@@ -13,6 +13,20 @@ FEATURES_NO_REGION = """Population, GDP_per_capita, Trade_union_density, Unemplo
 REGION = """Region_East_Asia_and_Pacific, Region_Europe_and_Central_Asia, 
             Region_Latin_America_and_Caribbean, Region_Middle_East_and_North_Africa"""
 
+FEATURE_MAP = {
+    "Population":"Population", 
+    "GDP_per_capita": "GDP per Capita", 
+    "Trade_union_density": "Trade Union Density", 
+    "Unemployment_rate": "Unemployment Rate",
+    "Health": "Health", 
+    "Education": "Education", 
+    "Housing": "Housing", 
+    "Community_development": "Community Development",
+    "Corporate_tax_rate": "Corporate Tax Rate", 
+    "Inflation": "Inflation", 
+    "IRLT": "IRLT"  
+}
+
 # Create a Blueprint for models routes
 models = Blueprint("models", __name__)
 
@@ -110,7 +124,7 @@ def predict_from_features(row):
         output = {}
         output["x_values"] = x_values.tolist()
         output["predictions"] = gini_values
-        output["x_axis"] = x_axis
+        output["x_axis"] = FEATURE_MAP[x_axis]
 
         current_app.logger.info(output)
 
