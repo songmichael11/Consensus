@@ -76,9 +76,12 @@ feed = getFeed(user_id, params)
 for post in feed:
     # Outer card
     with st.container():
-        c1, c2, c3 = st.columns([0.1, 0.6, 0.3], vertical_alignment="center")
+        c1, c2, c3, c4 = st.columns([0.1, 0.5, 0.3, 0.1], vertical_alignment="top")
 
         with c1:
+                # empty space to vertically center/align
+                st.markdown("<br>" * 4, unsafe_allow_html=True)
+
                 # Upvotes, Downvotes, Endorsements
                 with st.container():
                     if (post["upvoted"]) == "Upvoted":
@@ -128,6 +131,9 @@ for post in feed:
                         st.html(f"<p style='font-size: 15px; text-align: left; margin-left: -30px; margin-bottom: -10px'>{str(post['NumEndorsements'])}</p>")
 
         with c2:
+            # empty space to vertically center/align
+            st.markdown("<br>" * 4, unsafe_allow_html=True)
+
             # Title, Author, Description
             st.markdown(f"### {post['Title']}")
             st.markdown(f"**{post['author']}**")
@@ -137,6 +143,12 @@ for post in feed:
             st.markdown("**Show more**")
 
         with c3:
+            # Graph (placeholder image — replace with your GraphID renderer)
+            response = requests.get(f"http://web-api:4000/models/posts/predict/{post['GraphID']}")
+            data = response.json()
+            st.plotly_chart(go.Figure(data=go.Scatter(x=data["x_values"], y=data['predictions'], mode="lines+markers")), key=f"plot{post['PostID']}")
+
+        with c4:
             # Bookmark button (simple placeholder)
             if post['bookmarked'] == 'Saved':
                 bookmark_icon = "💾"
@@ -151,11 +163,6 @@ for post in feed:
 
                 if response.status_code == 200:
                     st.rerun()
-
-            # Graph (placeholder image — replace with your GraphID renderer)
-            response = requests.get(f"http://web-api:4000/models/posts/predict/{post['GraphID']}")
-            data = response.json()
-            st.plotly_chart(go.Figure(data=go.Scatter(x=data["x_values"], y=data['predictions'], mode="lines+markers")), key=f"plot{post['PostID']}")
 
     # Divider between posts
     st.markdown("---")
