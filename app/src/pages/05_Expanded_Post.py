@@ -119,7 +119,11 @@ def renderExpertOps(post):
             st.markdown(f"**{opinion['answerAuthor']}**")
             st.write(f"{opinion['BodyText']}")
 
-    
+def renderQuestions(post):
+    data = getQuestions(post["PostID"])
+    with st.container(border=True, height=200):
+        for question in data:
+            st.write(f"{question['QuestionText']}")
 
 # load user info from session
 user_id = st.session_state.get('UserID', None)
@@ -167,11 +171,13 @@ with st.container():
 with st.container():
     c3a, c3b = st.columns([0.5, 0.5])
     with c3a:
-        with st.container(border=True):
+        with st.container(border=True, height=300):
+            st.markdown("#### Expert Opinions")
             renderExpertOps(post)
     with c3b:
-        with st.container(border=True):
-            st.write("blah")
+        with st.container(border=True, height=300):
+            st.markdown('### Q&A')
+            renderQuestions(post)
 
 # button to return to the feed
 if st.button("Return to Feed"):
