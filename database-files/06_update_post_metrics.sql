@@ -1,5 +1,11 @@
 USE Consensus_DB;
 
+DELETE FROM DownvotesUsers
+WHERE (UserID, PostID) IN (
+  SELECT UserID, PostID
+  FROM UpvotesUsers
+);
+
 UPDATE Posts
 SET NumUpvotes = (
   SELECT COUNT(*)
@@ -20,3 +26,4 @@ SET NumEndorsements = (
   FROM EndorsementsUsers
   WHERE EndorsementsUsers.PostID = Posts.PostID
 );
+
