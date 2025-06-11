@@ -75,12 +75,27 @@ feed = getFeed(user_id, params)
 # Draw feed
 for post in feed:
     # Outer card
-    with st.container():
-        c1, c2, c3, c4 = st.columns([0.1, 0.5, 0.3, 0.1], vertical_alignment="top")
+    with st.container(border=True):
+        c1, c2, c3 = st.columns([0.1, 0.5, 0.3], vertical_alignment="center")
 
         with c1:
                 # empty space to vertically center/align
-                st.markdown("<br>" * 4, unsafe_allow_html=True)
+                # st.markdown("<br>" * 2, unsafe_allow_html=True)
+
+                # Bookmark button (simple placeholder)
+                if post['bookmarked'] == 'Saved':
+                    bookmark_icon = "💾"
+                else:
+                    bookmark_icon = ":("
+
+                if st.button(f"{bookmark_icon}", key=f"bookmark_{post['PostID']}"):
+                    if post['bookmarked'] == "Saved":
+                        response = updatePostUtils("delete", "bookmark", post["PostID"], user_id)
+                    else:
+                        response = updatePostUtils("put", "bookmark", post["PostID"], user_id)
+
+                    if response.status_code == 200:
+                        st.rerun()
 
                 # Upvotes, Downvotes, Endorsements
                 with st.container():
@@ -132,7 +147,7 @@ for post in feed:
 
         with c2:
             # empty space to vertically center/align
-            st.markdown("<br>" * 4, unsafe_allow_html=True)
+            # st.markdown("<br>" * 4, unsafe_allow_html=True)
 
             # Title, Author, Description
             st.markdown(f"### {post['Title']}")
@@ -146,23 +161,9 @@ for post in feed:
             # Graph (placeholder image — replace with your GraphID renderer)
             response = requests.get(f"http://web-api:4000/models/posts/predict/{post['GraphID']}")
             data = response.json()
-            st.plotly_chart(go.Figure(data=go.Scatter(x=data["x_values"], y=data['predictions'], mode="lines+markers")), key=f"plot{post['PostID']}")
-
-        with c4:
-            # Bookmark button (simple placeholder)
-            if post['bookmarked'] == 'Saved':
-                bookmark_icon = "💾"
-            else:
-                bookmark_icon = "Not Saved"
-
-            if st.button(f"{bookmark_icon}", key=f"bookmark_{post['PostID']}"):
-                if post['bookmarked'] == "Saved":
-                    response = updatePostUtils("delete", "bookmark", post["PostID"], user_id)
-                else:
-                    response = updatePostUtils("put", "bookmark", post["PostID"], user_id)
-
-                if response.status_code == 200:
-                    st.rerun()
-
-    # Divider between posts
-    st.markdown("---")
+            fig = go.Figure(go.Scatter(x=data["x_values"], y=data['predictions'], mode="lines+markers"))
+            fig.update_layout(title_text=f"{data['x_axis']} vs. GINI", 
+                              margin_autoexpand=False,
+                              margin=dict(t=75, b=50, l=10, r=10),
+                              height=325)
+            st.plotly_chart(fig, key=f"plot{post['PostID']}")
