@@ -91,6 +91,14 @@ def insert_userQuestion(): #NOTE: need to manually change PostID to QuestionID i
                                  max_votes=3
                                  )
 
+def insert_expertOp(): #NOTE: need to manually change PostID to ExpertOpID in insert statment after generation
+  return generate_bridge_inserts(table_name="ExpertOpUsers",
+                                 user_range=(13,18),
+                                 post_range=(1,80),
+                                 min_votes=1,
+                                 max_votes=1
+                                 )
+
 with open("database-files/05_insert_bridge.sql", "w") as f:
     f.write("USE Consensus_DB;\n")
     f.write(insert_upvotes())
@@ -98,3 +106,5 @@ with open("database-files/05_insert_bridge.sql", "w") as f:
     f.write(insert_endorsements())
     f.write(insert_bookmarks())
     f.write(insert_userQuestion())
+    f.write(insert_expertOp())
+
