@@ -91,6 +91,7 @@ FEATURE_MAPPING = {
     "IRLT": "IRLT"
 }
 
+
 # Global presets data - hardcoded for simplicity and performance
 PRESETS = {
     "China (2022)": {
