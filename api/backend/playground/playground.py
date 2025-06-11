@@ -262,14 +262,14 @@ def get_presets():
         
         # Select the most recent year for each country in our training set
         preset_query = """
-            SELECT * 
-            FROM TrainingData
-            WHERE DataID IN (
-                SELECT MAX(DataID)
+            SELECT tr.*
+            FROM TrainingData tr
+            INNER JOIN (
+                SELECT Country_code, MAX(Time_period) AS max_time
                 FROM TrainingData 
                 GROUP BY Country_code
-            )
-            GROUP BY Country_code
+            ) sub
+            ON tr.Country_code = sub.Country_code AND tr.Time_period = sub.max_time;
         """
         
         cursor.execute(preset_query)
