@@ -56,7 +56,6 @@ def renderBookmarkButton(post, mode="default"):
         else:
             response = updatePostUtils("put", "bookmark", post["PostID"], user_id)
 
-        st.write(response.status_code)
         if response.status_code == 200:
             st.rerun()
 
@@ -126,6 +125,11 @@ def renderQuestions(post):
         for question in data:
             st.write(f"{question['QuestionText']}")
 
+def getPostByID(post_id, user_id):
+    url = f"http://web-api:4000/feed/post/{post_id}/{user_id}"
+    response = requests.get(url)
+    return response.json()
+
 # load user info from session
 user_id = st.session_state.get('UserID', None)
 if not user_id:
@@ -133,9 +137,12 @@ if not user_id:
     if st.button("Return Home"):
         st.switch_page("Home.py")
 # load post info from session
-post = st.session_state.get('ExpandedPost', None)
-if not post:
+post_id = st.session_state.get("ExpandedPost", {}).get("PostID", None)
+if not post_id:
     st.error("No post logged. Please return to the feed.")
+    st.stop()
+
+post = getPostByID(post_id, user_id)
 
 
 # Main rendering here
