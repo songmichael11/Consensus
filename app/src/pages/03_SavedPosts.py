@@ -54,6 +54,12 @@ for graph in graphs:
         with c1:
             st.markdown(f"## {graph['name']}")
             st.markdown(f"#### {graph['date_saved'][:-9]}")
+            if st.button("Open in Data Playground", key=f"dataPlaygroundButton{graph['graph_id']}"):
+                st.write("This should open")
+
+            if st.button("Make Post", key=f"makePost{graph['graph_id']}"):
+                st.session_state["PostedGraph"] = graph
+                st.switch_page("pages/04_Make_Post.py")
             
         with c2:
             renderPlotlyGraph(graph['graph_id'])
