@@ -208,7 +208,7 @@ with st.sidebar:
     st.markdown("---")
     
     # Load saved graphs
-    st.markdown("### 📁 Saved Graphs")
+    st.markdown("### 📁 Load Saved Graphs")
     saved_graphs = fetch_saved_graphs(user_id)
     
     if saved_graphs:
@@ -612,6 +612,7 @@ with col3:
                     st.success(f"Graph '{graph_name}' saved successfully!")
                     # Clear the cached saved graphs so they refresh
                     st.cache_data.clear()
+                    st.rerun()
                 else:
                     st.error(f"Failed to save graph: {response.get('error', 'Unknown error')}")
     

@@ -20,8 +20,8 @@ def PlaygroundNav():
     st.sidebar.page_link("pages/01_Playground.py", label="Data Playground")
 
 # change 
-def SavedGraphsNav():
-    st.sidebar.page_link("Home.py", label="Saved Graphs")
+def PostGraphsNav():
+    st.sidebar.page_link("03_SavedPosts.py", label="Post a Graph")
 
 def ProfileNav():
     st.sidebar.page_link("Home.py", label="My Profile")
@@ -49,7 +49,7 @@ def SideBarLinks(show_home=False):
     if st.session_state["authenticated"]:
         FeedNav()
         PlaygroundNav()
-        SavedGraphsNav()
+        PostGraphsNav()
         ProfileNav()
 
     # Always show the About page at the bottom of the list of links
