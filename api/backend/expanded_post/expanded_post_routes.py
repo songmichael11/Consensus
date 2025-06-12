@@ -140,6 +140,47 @@ def post_question(post_id, user_id):
         current_app.logger.error(f"Database error in post_question: {str(e)}")
         return jsonify({"error": str(e)}), 500
     
+# post request to answer a question for a specific questionID from a specific user
+@expanded_post.route("/answer/question/<int:question_id>/user/<int:user_id>", methods=["POST"])
+def post_answer(question_id, user_id):
+    try:
+        current_app.logger.info(f"Starting post_question request for post {question_id} by user {user_id}")
+
+        data = request.get_json()
+
+        cursor = db.get_db().cursor()
+
+        # First check if the question has already been answered
+        check_query = """
+            SELECT COUNT(AnswerID) 
+            FROM Answers
+            WHERE QuestionID = %s
+        """
+        cursor.execute(check_query, (question_id))
+        exists = cursor.fetchone()['COUNT(AnswerID)'] > 0
+
+        if exists: # If the question has already been answered, return 200
+            current_app.logger.info(f"Question {question_id} has already been answered")
+            return jsonify({"message": "Question has already been answered"}), 200
+
+        # insert into answers table
+        insert_query = """
+            INSERT INTO Answers (AnswerText, QuestionID, UserID) 
+            VALUES (%s, %s, %s)
+        """
+        cursor.execute(insert_query, (data["AnswerText"], question_id, user_id))
+        db.get_db().commit()
+        new_question_id = cursor.lastrowid
+
+        cursor.close()
+
+        current_app.logger.info(f"Successfully added question for question {question_id} by user {user_id}")
+        return jsonify({"message": "Successfully added question to post"}), 200
+
+    except Error as e:
+        current_app.logger.error(f"Database error in post_answer: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
 # when a post is expanded, gets the expert opinions
 @expanded_post.route("/exops/<int:post_id>", methods=["GET"])
 def get_exops(post_id):
