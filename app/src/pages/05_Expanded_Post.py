@@ -68,7 +68,7 @@ def renderBookmarkButton(post, mode="default"):
     else:
         bookmark_icon = ":material/bookmark:"
 
-    if st.button(label=bookmark_icon, type="tertiary", key=f"bookmark_{post['PostID']}_{mode}"):
+    if st.button(label=bookmark_icon, type="secondary", key=f"bookmark_{post['PostID']}_{mode}"):
         if post['bookmarked'] == "Saved":
             response = updatePostUtils("delete", "bookmark", post["PostID"], user_id)
         else:
@@ -110,12 +110,12 @@ def renderUpvotesDownvotes(post, mode="default"):
 
 def renderEndorsement(post):
     if (post["endorsed"]) == "Endorsed":
-        endorsedIcon = "✅"
+        endorsedIcon = ":material/verified:"
     else:
         endorsedIcon = "✔️"
 
     if "Politician" in st.session_state['Roles']:
-        if st.button(label=endorsedIcon, key=f'endorsement{post["PostID"]}', type='tertiary'):
+        if st.button(label=endorsedIcon, key=f'endorsement{post["PostID"]}', type='secondary'):
             if post['endorsed'] == "Endorsed":
                 response = updatePostUtils("delete", "endorsement", post["PostID"], user_id)
             else:
