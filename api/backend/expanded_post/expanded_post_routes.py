@@ -59,6 +59,36 @@ def get_one_post(post_id, user_id):
         return jsonify({"error": str(e)}), 500
 
 
+# when a post is expanded, gets the questions and answers for a post
+@expanded_post.route("/questions/<int:post_id>", methods=["GET"])
+def get_questions(post_id):
+    try:
+        current_app.logger.info(f"""Starting get_questions request""")
+        cursor = db.get_db().cursor()
+
+        query = """SELECT q.IsHidden,
+                        q.CreatedAt,
+                        q.QuestionText,
+                        a.AnswerText,
+                        u.Name AS answerAuthor
+                    FROM Questions q
+                        LEFT JOIN Answers a 
+                            ON q.QuestionID = a.AnswerID
+                        LEFT JOIN Users u 
+                            ON u.UserID = a.UserID
+                    WHERE q.PostID = %s"""
+        params = int(post_id)
+
+        current_app.logger.debug(f'Executing query: {query}', params)
+        cursor.execute(query, params)
+        questions = cursor.fetchall()
+        cursor.close()
+        
+        return jsonify(questions), 200
+
+    except Error as e:
+            return jsonify({"error": str(e)}), 500
+
 # post request to ask a question for a specific post, from a specific user
 @expanded_post.route("/question/post/<int:post_id>/user/<int:user_id>", methods=["POST"])
 def post_question(post_id, user_id):
@@ -109,3 +139,31 @@ def post_question(post_id, user_id):
     except Error as e:
         current_app.logger.error(f"Database error in post_question: {str(e)}")
         return jsonify({"error": str(e)}), 500
+    
+# when a post is expanded, gets the expert opinions
+@expanded_post.route("/exops/<int:post_id>", methods=["GET"])
+def get_exops(post_id):
+    try:
+        current_app.logger.info(f"""Starting get_exops request""")
+        cursor = db.get_db().cursor()
+
+        query = """SELECT eo.BodyText,
+                        eo.CreatedAt,
+                        u.Name AS answerAuthor
+                    FROM ExpertOpinions eo
+                        LEFT JOIN ExpertOpUsers eou 
+                            ON eo.ExpertOpID = eou.ExpertOpID
+                        LEFT JOIN Users u 
+                            ON u.UserID = eou.UserID
+                    WHERE eo.PostID = %s"""
+        params = int(post_id)
+
+        current_app.logger.debug(f'Executing query: {query}', params)
+        cursor.execute(query, params)
+        questions = cursor.fetchall()
+        cursor.close()
+        
+        return jsonify(questions), 200
+
+    except Error as e:
+            return jsonify({"error": str(e)}), 500

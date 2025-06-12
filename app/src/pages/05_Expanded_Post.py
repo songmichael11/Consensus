@@ -10,6 +10,11 @@ import plotly.graph_objects as go
 st.set_page_config(layout='wide')
 
 #API requests
+def getPostByID(post_id, user_id):
+    url = f"http://web-api:4000/expanded_post/post/{post_id}/{user_id}"
+    response = requests.get(url)
+    return response.json()
+
 # update a post's upvotes, downvotes, or endorsements
 # type can be either a put or delete, and metric can be either upvote, downvote, or endorsement
 def updatePostUtils(type, metric, post_id, user_id):
@@ -21,13 +26,13 @@ def updatePostUtils(type, metric, post_id, user_id):
         return requests.delete(url)
 
 def getExpertOpinions(post_id):
-    API_BASE = "http://web-api:4000/feed/exops"
+    API_BASE = "http://web-api:4000/expanded_post/exops"
     url = f"{API_BASE}/{post_id}"
     response = requests.get(url)
     return response.json()
 
 def getQuestions(post_id):
-    API_BASE = "http://web-api:4000/feed/questions"
+    API_BASE = "http://web-api:4000/expanded_posted/questions"
     url = f"{API_BASE}/{post_id}"
     response = requests.get(url)
     return response.json()
@@ -125,10 +130,6 @@ def renderQuestions(post):
         for question in data:
             st.write(f"{question['QuestionText']}")
 
-def getPostByID(post_id, user_id):
-    url = f"http://web-api:4000/expanded_post/post/{post_id}/{user_id}"
-    response = requests.get(url)
-    return response.json()
 
 # load user info from session
 user_id = st.session_state.get('UserID', None)
