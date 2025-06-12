@@ -60,8 +60,9 @@ def renderPlotlyGraph(post):
     fig = go.Figure(go.Scatter(x=data["x_values"], y=data['predictions'], mode="lines+markers"))
     fig.update_layout(title_text=f"{data['x_axis']} vs. GINI", 
                         margin_autoexpand=False,
-                        margin=dict(t=75, b=50, l=10, r=10),
-                        height=325)
+                        margin=dict(t=75, b=50, l=50, r=10),
+                        height=325,
+                        yaxis_tickformat='.4f')
     st.plotly_chart(fig, key=f"plot{post['PostID']}")
 
 def renderBookmarkButton(post, mode="default"):
