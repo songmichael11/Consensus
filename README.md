@@ -22,7 +22,7 @@ Throughout the journey of building this MVP, we have kept a blog that contains s
 <to be written>
 
 ### Paulo Martinez-Amezaga
-<to be written>
+At the beginning, I assisted same with the first ML Model. I also fetched, cleaned, merged, and stored the data from the Worldbank and some OECD data. My biggest contribution was building the Deep Neural Network. I built a Deep Neural Network to predict GINI and was able to obtain a better r^2. Then I built a Deep Neural Network to predict Unemployment. I built residual plots, obtained r^2 scores and used K fold cross validation in order to ensure our DNN model was in a good enough spot to deploy. I then worked with Sean to deploy the Deep Neural Network into our final product.
 
 ### Sam Pollak
 At the beginning, I conceptualized our first ML model, then fetched, cleaned, merged and stored most of the data from APIs, including 14 different features from 2 different sources. Then, I built our linear and logistic regression models from numpy and evaluated them using residual plots, r^2 scores and cross-validation tests. I then helped make refinements to our data playground to make it feel more intuitive to the user, including descriptions for each feature, formatting each number input with minimums, maximums, steps and default values, working with Sean to implement presets using real data, and automatic adjusting of the min and max values on the graph to reflect a reasonable range.
