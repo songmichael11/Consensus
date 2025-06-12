@@ -128,7 +128,7 @@ def renderEndorsement(post):
 
 def renderExpertOps(post):
     data = getExpertOpinions(post["PostID"])
-    with st.container(border=True, height=200):
+    with st.container(border=False, height=200):
         for opinion in data:
             with st.container(border=True):
                 st.markdown(f"**{opinion['answerAuthor']}**")
@@ -136,7 +136,7 @@ def renderExpertOps(post):
 
 def renderQuestions(post):
     data = getQuestions(post["PostID"])
-    with st.container(border=True, height=200):
+    with st.container(border=False, height=200):
         for question in data:
             with st.container(border=True):
                 st.markdown(f"**Question:** {question['QuestionText']}")
@@ -228,25 +228,27 @@ with st.container():
         renderPlotlyGraph(post)
 
 with st.container():
-    c3a, c3b = st.columns([0.5, 0.5])
-    with c3a:
-        with st.container(border=True, height=300):
-            c3aa, c3ab = st.columns([0.55, 0.45], vertical_alignment="bottom")
-            with c3aa:
-                st.markdown("#### Expert Opinions")
-            with c3ab:
-                if "Economist" in st.session_state['Roles']:
-                    renderExpertInputButton(post)
-            renderExpertOps(post)
-    with c3b:
-        with st.container(border=True, height=300):
-            c3ba, c3bb = st.columns([0.55, 0.45], vertical_alignment="bottom")
-            with c3ba:
-                st.markdown('### Q&A')
-            with c3bb:
-                if "Voter" in st.session_state['Roles']:
-                    renderQuestionButton(post)
-            renderQuestions(post)
+  c3a, c3b = st.columns([0.5, 0.5])
+  
+  with c3a:
+    with st.container(border=True, height=300):
+      header_col, button_col = st.columns([0.4, 0.6])
+      with header_col:
+        st.markdown("###### Expert Opinions")
+      with button_col:
+        if "Economist" in st.session_state['Roles']:
+          renderExpertInputButton(post)
+      renderExpertOps(post)
+
+  with c3b:
+    with st.container(border=True, height=300):
+      header_col, button_col = st.columns([0.5, 0.5])
+      with header_col:
+        st.markdown("#### Q&A")
+      with button_col:
+        if "Voter" in st.session_state['Roles']:
+          renderQuestionButton(post)
+      renderQuestions(post)
 
 # button to return to the feed
 if st.button("Return to Feed"):
