@@ -502,6 +502,7 @@ with col3:
 
     stds = requests.get(API_BASE_URL + "/models/playground/stds").json()[0]
     current_std = stds[FEATURE_MAPPING[compare_feature]]
+    st.write()
 
     # Set default values from loaded graph
     default_x_min = loaded_graph.get('x_min', 0) if loaded_graph else 0

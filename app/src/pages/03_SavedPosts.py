@@ -16,7 +16,6 @@ if not user_id:
     if st.button("Return Home"):
         st.switch_page("Home.py")
 
-
 # requests
 # gets the saved graphs by calling the saved graphs route
 def getSavedGraphs(user_id):
@@ -30,6 +29,17 @@ def getSavedGraphs(user_id):
         st.error(f"Error loading feed: {e}")
         st.stop()
 
+# UI ----------------------
+def renderPlotlyGraph(graphID):
+    response = requests.get(f"http://web-api:4000/models/posts/predict/{graphID}")
+    data = response.json()
+    fig = go.Figure(go.Scatter(x=data["x_values"], y=data['predictions'], mode="lines+markers"))
+    fig.update_layout(title_text=f"{data['x_axis']} vs. GINI", 
+                        margin_autoexpand=False,
+                        margin=dict(t=75, b=50, l=10, r=10),
+                        height=300)
+    st.plotly_chart(fig, key=f"plot{graphID}")
+
 # sidebar
 SideBarLinks()
 
@@ -40,4 +50,10 @@ graphs = getSavedGraphs(user_id)
 
 for graph in graphs:
     with st.container(border=True):
-        st.write(graph['name'])
+        c0, c1, c2 = st.columns([0.1, 0.4, 0.5])
+        with c1:
+            st.markdown(f"## {graph['name']}")
+            st.markdown(f"#### {graph['date_saved'][:-9]}")
+            
+        with c2:
+            renderPlotlyGraph(graph['graph_id'])
