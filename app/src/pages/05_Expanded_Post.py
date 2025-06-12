@@ -41,6 +41,10 @@ def postQuestion(post, body):
     url = f"http://web-api:4000/expanded_post/question/post/{post['PostID']}/user/{st.session_state.get('UserID', None)}"
     return requests.post(url, json=body)
 
+def postAnswer(question, body):
+    url = f"http://web-api:4000/expanded_post/answer/question/{question['QuestionID']}/user/{st.session_state.get('UserID', None)}"
+    return requests.post(url, json=body)
+
 def postExOp(post, body):
     url = f"http://web-api:4000/expanded_post/exops/post/{post['PostID']}/user/{st.session_state.get('UserID', None)}"
     return requests.post(url, json=body)
@@ -136,6 +140,8 @@ def renderQuestions(post):
         for question in data:
             with st.container(border=True):
                 st.write(f"{question['QuestionText']}")
+                if question["AnswerText"] == None:
+                    renderAnswerButton(question)
 
 def renderQuestionButton(post):
     body = {}
@@ -147,6 +153,17 @@ def renderQuestionButton(post):
                 st.badge("Question Submitted!", color="green")
             elif response.status_code == 210:
                 st.badge("User has submitted too many questions", color="red")
+
+def renderAnswerButton(question):
+    body = {}
+    with st.popover(label="Answer a Question"):
+        body["AnswerText"] = st.text_input(label="Answer", max_chars=300, key=f"textAnswer{question['QuestionID']}")
+        if st.button("Submit", key=f"submitAnswer{question['QuestionID']}"):
+            response = postAnswer(question, body)
+            if response.status_code == 200:
+                st.badge("Answer Submitted!", color="green")
+            elif response.status_code == 210:
+                st.badge("Question has already been answered", color="red")
 
 def renderExpertInputButton(post):
     body = {}

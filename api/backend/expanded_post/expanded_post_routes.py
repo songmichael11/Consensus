@@ -66,7 +66,8 @@ def get_questions(post_id):
         current_app.logger.info(f"""Starting get_questions request""")
         cursor = db.get_db().cursor()
 
-        query = """SELECT q.IsHidden,
+        query = """SELECT q.QuestionID,
+                        q.IsHidden,
                         q.CreatedAt,
                         q.QuestionText,
                         a.AnswerText,
@@ -165,7 +166,7 @@ def post_answer(question_id, user_id):
 
         if exists: # If the question has already been answered, return 200
             current_app.logger.info(f"Question {question_id} has already been answered")
-            return jsonify({"message": "Question has already been answered"}), 200
+            return jsonify({"message": "Question has already been answered"}), 210
 
         # insert into answers table
         insert_query = """
