@@ -14,6 +14,8 @@ Upon going to localhost:8501, you will be taken to our landing page, where you c
 
 Throughout the journey of building this MVP, we have kept a blog that contains status updates on our team progress, as well as individual blog posts containing details about our individual contributions and general life updates in our study-abroad journey.
 
+[Click here to visit our amazing blog](https://smpollak.github.io/MPSS-25su-DoC-Blog/)
+
 ## Individual contributions
 
 ### Sean Blundin
@@ -23,7 +25,7 @@ Throughout the journey of building this MVP, we have kept a blog that contains s
 <to be written>
 
 ### Sam Pollak
-At the beginning, I conceptualized our first ML model, then fetched, cleaned, merged and stored most of the data from APIs. Then, I built our linear and logistic regression models from numpy and evaluated them using residual plots, r^2 scores and cross-validation tests. I then helped make refinements to our data playground to make it feel more intuitive to the user, including descriptions for each feature, formatting each number input with minimums, maximums, steps and default values, working with Sean to implement presets using real data, and automatic adjusting of the min and max values on the graph to reflect a reasonable range.
+At the beginning, I conceptualized our first ML model, then fetched, cleaned, merged and stored most of the data from APIs, including 14 different features from 2 different sources. Then, I built our linear and logistic regression models from numpy and evaluated them using residual plots, r^2 scores and cross-validation tests. I then helped make refinements to our data playground to make it feel more intuitive to the user, including descriptions for each feature, formatting each number input with minimums, maximums, steps and default values, working with Sean to implement presets using real data, and automatic adjusting of the min and max values on the graph to reflect a reasonable range.
 
 ### Michael Song
 <to be written>
