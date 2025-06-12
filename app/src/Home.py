@@ -17,6 +17,10 @@ def updateSessionState(userID):
     st.session_state.update(response)
     st.session_state['authenticated'] = True
 
+def getUserNames(role_id):
+    response = requests.get(f"{API_URL}/role/{role_id}").json()
+    return response
+
 # streamlit supports reguarl and wide layout (how the controls
 # are organized/displayed on the screen).
 st.set_page_config(page_title="Consensus Login", layout="wide")
@@ -25,19 +29,18 @@ st.set_page_config(page_title="Consensus Login", layout="wide")
 # authenticated.  So we change the 'authenticated' value
 # in the streamlit session_state to false. 
 st.session_state['authenticated'] = False
-# Use the SideBarLinks function from src/modules/nav.py to control
-# the links displayed on the left-side panel. 
-# IMPORTANT: ensure src/.streamlit/config.toml sets
-# showSidebarNavigation = false in the [client] section
+
+showSidebarNavigation = False 
 # SideBarLinks(show_home=True)
 logger.info("Loading the Home page of the app")
 
 a1, a2 = st.columns([0.5, 0.5])
 with a1:
-    st.image("assets/logo.png")
+    st.image("assets/logo.png", width=800)
 with a2: 
     # title
-    st.markdown("<h1 style='font-size: 72px; text-align: center;'>Consensus</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-size: 108px; text-align: left'>Consensus</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-size: 40px; color:#aaaaaa; text-align: left; margin-top: -30px; margin-bottom:-40px'>Policy Reimagined.</h1>", unsafe_allow_html=True)
 
     st.markdown("---")
     st.markdown("### Who would you like to log in as?")
@@ -46,18 +49,22 @@ with a2:
     b1, b2, b3 = st.columns(3)
 
     with b1:
+        voter_id = st.selectbox(label="Voters: ", options=getUserNames(1))
         if st.button("Log in as Voter,\nPrince Maximilian", use_container_width=True):
             updateSessionState(1)
             st.success("Logged in as Voter")
             st.switch_page('pages/00_Feed.py')
 
     with b2:
+        voter_id = st.selectbox(label="Voters: ", options=getUserNames(1))
+
         if st.button("Log in as Politician,\nJT Nance", use_container_width=True):
             updateSessionState(7)
             st.success("Logged in as Politician")
             st.switch_page('pages/00_Feed.py')
 
     with b3:
+        voter_id = st.selectbox(label="Voters: ", options=getUserNames(1))
         if st.button("Log in as Economist,\nEmeka Okonkwo", use_container_width=True):
             updateSessionState(13)
             st.success("Logged in as Economist")
