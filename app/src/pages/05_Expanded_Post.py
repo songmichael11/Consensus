@@ -138,7 +138,9 @@ def renderQuestionButton(post):
         if st.button("Submit"):
             response = postQuestion(post, body)
             if response.status_code == 200:
-                st.write("Question Submitted!")
+                st.badge("Question Submitted!", color="green")
+            elif response.status_code == 210:
+                st.badge("User has submitted too many questions", color="red")
 
 # load user info from session
 user_id = st.session_state.get('UserID', None)
