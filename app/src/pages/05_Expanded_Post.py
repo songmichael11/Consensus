@@ -129,7 +129,8 @@ def renderQuestions(post):
     data = getQuestions(post["PostID"])
     with st.container(border=True, height=200):
         for question in data:
-            st.write(f"{question['QuestionText']}")
+            with st.container(border=True):
+                st.write(f"{question['QuestionText']}")
 
 def renderQuestionButton(post):
     body = {}
@@ -196,11 +197,12 @@ with st.container():
             renderExpertOps(post)
     with c3b:
         with st.container(border=True, height=300):
-            c3ba, c3bb = st.columns([0.7, 0.3])
+            c3ba, c3bb = st.columns([0.55, 0.45], vertical_alignment="bottom")
             with c3ba:
                 st.markdown('### Q&A')
             with c3bb:
-                renderQuestionButton(post)
+                if "Voter" in st.session_state['Roles']:
+                    renderQuestionButton(post)
             renderQuestions(post)
 
 # button to return to the feed
