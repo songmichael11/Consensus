@@ -3,7 +3,7 @@ from backend.db_connection import db
 from mysql.connector import Error
 from flask import current_app
 
-# create blueprint for landing
+# create blueprint for feed
 feed = Blueprint("feed", __name__)
 
 # ---This blueprint is for the feed page of the site---
@@ -90,7 +90,7 @@ def get_feed(user_id):
             query += " LIMIT %s"
             params.append(limit)
         else: # default limit 10 posts in feed
-            query += " LIMIT 10"
+            query += " LIMIT 15"
         
         current_app.logger.debug(f'Executing query: {query}')
         cursor.execute(query, params)
