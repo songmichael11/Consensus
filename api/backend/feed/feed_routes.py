@@ -46,7 +46,8 @@ def get_feed(user_id):
                         THEN 'Downvoted' ELSE 'Not Downvoted' END AS downvoted,
                     CASE WHEN eu.UserID IS NOT NULL 
                         THEN 'Endorsed' ELSE 'Not Endorsed' END AS endorsed,
-                    p.GraphID
+                    p.GraphID,
+                    DATE_FORMAT(p.CreatedAt, "%%M %%d %%Y") AS CreatedAt
                     FROM Posts p
                     JOIN Users author 
                         ON p.UserID = author.UserID

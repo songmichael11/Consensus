@@ -96,15 +96,6 @@ def SideBarLinks(show_home=False):
         SavedGraphsNav()
         ProfileNav()
 
-        # # Show World Bank Link and Map Demo Link if the user is a political strategy advisor role.
-        # if "Politician" in st.session_state["Roles"]:
-
-        # # If the user role is usaid worker, show the Api Testing page
-        # if "Voter" in st.session_state["Roles"]:
-
-        # # If the user is an administrator, give them access to the administrator pages
-        # if "Economist" in st.session_state["Roles"]:
-
 
     # Always show the About page at the bottom of the list of links
     AboutPageNav()

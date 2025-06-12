@@ -67,9 +67,9 @@ def renderPlotlyGraph(post):
 def renderBookmarkButton(post, mode="default"):
     # Bookmark button (simple placeholder)
     if post['bookmarked'] == 'Saved':
-        bookmark_icon = "💾"
+        bookmark_icon = ":material/bookmark_check:"
     else:
-        bookmark_icon = ":("
+        bookmark_icon = ":material/bookmark:"
 
     if st.button(f"{bookmark_icon}", key=f"bookmark_{post['PostID']}_{mode}"):
         if post['bookmarked'] == "Saved":
@@ -177,7 +177,11 @@ for post in feed:
             # st.markdown("<br>" * 4, unsafe_allow_html=True)
 
             # title, Author, Description
-            st.markdown(f"### {post['Title']}")
+            c2a, c2b = st.columns([0.7, 0.3], vertical_alignment="center")
+            with c2a:
+                st.markdown(f"### {post['Title']}")
+            with c2b:
+                st.write(post["CreatedAt"])
             st.markdown(f"by **{post['author']}**")
 
             # auto truncate description if post is too long
