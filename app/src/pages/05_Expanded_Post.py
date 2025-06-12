@@ -139,11 +139,11 @@ def renderQuestions(post):
     with st.container(border=True, height=200):
         for question in data:
             with st.container(border=True):
-                st.write(f"{question['QuestionText']}")
+                st.markdown(f"**Question:** {question['QuestionText']}")
                 if question["AnswerText"] == None:
                     renderAnswerButton(question)
                 else:
-                    st.write(question["AnswerText"])
+                    st.markdown(f"**Answer from {question['answerAuthor']}:** " + question["AnswerText"])
 
 def renderQuestionButton(post):
     body = {}
