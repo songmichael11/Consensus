@@ -230,7 +230,7 @@ def post_exop(post_id, user_id):
             FROM ExpertOpinions eo
                 JOIN ExpertOpUsers eou
                     ON eo.ExpertOpID = eou.ExpertOpID 
-            WHERE uq.UserID = %s AND q.PostID = %s
+            WHERE eou.UserID = %s AND eo.PostID = %s
         """
         cursor.execute(check_query, (user_id, post_id))
         exists = cursor.fetchone()['COUNT(eo.ExpertOpID)'] > 0

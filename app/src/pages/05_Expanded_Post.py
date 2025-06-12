@@ -41,8 +41,9 @@ def postQuestion(post, body):
     url = f"http://web-api:4000/expanded_post/question/post/{post['PostID']}/user/{st.session_state.get('UserID', None)}"
     return requests.post(url, json=body)
 
-# def postExOp(post, body):
-
+def postExOp(post, body):
+    url = f"http://web-api:4000/expanded_post/exops/post/{post['PostID']}/user/{st.session_state.get('UserID', None)}"
+    return requests.post(url, json=body)
 
 # UI rendering
 def renderPlotlyGraph(post):
@@ -139,7 +140,7 @@ def renderQuestionButton(post):
     body = {}
     with st.popover(label="Ask a Question"):
         body["QuestionText"] = st.text_input(label="Question", max_chars=300)
-        if st.button("Submit"):
+        if st.button("Submit", key="submitQuestion"):
             response = postQuestion(post, body)
             if response.status_code == 200:
                 st.badge("Question Submitted!", color="green")
@@ -150,10 +151,10 @@ def renderExpertInputButton(post):
     body = {}
     with st.popover(label="Add Expert Feedback"):
         body["BodyText"] = st.text_input(label="ExpertInput", max_chars=600)
-        if st.button("Submit"):
+        if st.button("Submit", key="submitFeedback"):
             response = postExOp(post, body)
             if response.status_code == 200:
-                st.badge("Question Submitted!", color="green")
+                st.badge("Feedback Submitted!", color="green")
             elif response.status_code == 210:
                 st.badge("User has already submitted feedback", color="orange")
 
