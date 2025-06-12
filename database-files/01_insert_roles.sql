@@ -4,4 +4,5 @@ INSERT INTO Roles(RoleType)
         VALUES
         ("Voter"),
         ("Politician"),
-        ("Economist");
+        ("Economist"),
+        ("User");

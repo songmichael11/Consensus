@@ -141,7 +141,10 @@ def renderQuestions(post):
             with st.container(border=True):
                 st.markdown(f"**Question:** {question['QuestionText']}")
                 if question["AnswerText"] == None:
-                    renderAnswerButton(question)
+                    if "Politician" in st.session_state['Roles'] or "Economist" in st.session_state['Roles']:
+                        renderAnswerButton(question)
+                    else:
+                        st.markdown(f"**Unanswered**")
                 else:
                     st.markdown(f"**Answer from {question['answerAuthor']}:** " + question["AnswerText"])
 
@@ -244,7 +247,7 @@ with st.container():
     with st.container(border=True, height=300):
       header_col, button_col = st.columns([0.5, 0.5])
       with header_col:
-        st.markdown("#### Q&A")
+        st.markdown("###### Voter Questions")
       with button_col:
         if "Voter" in st.session_state['Roles']:
           renderQuestionButton(post)
