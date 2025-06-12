@@ -167,6 +167,7 @@ if not user_id:
         st.switch_page('Home.py')
     st.stop()
 
+
 # Fetch available features from backend
 if st.session_state.available_features is None:
     with st.spinner("Loading available features..."):
@@ -208,7 +209,7 @@ with st.sidebar:
     st.markdown("---")
     
     # Load saved graphs
-    st.markdown("### 📁 Saved Graphs")
+    st.markdown("### 📁 Load Saved Graphs")
     saved_graphs = fetch_saved_graphs(user_id)
     
     if saved_graphs:
@@ -502,6 +503,7 @@ with col3:
 
     stds = requests.get(API_BASE_URL + "/models/playground/stds").json()[0]
     current_std = stds[FEATURE_MAPPING[compare_feature]]
+    st.write()
 
     # Set default values from loaded graph
     default_x_min = loaded_graph.get('x_min', 0) if loaded_graph else 0
@@ -612,6 +614,7 @@ with col3:
                     st.success(f"Graph '{graph_name}' saved successfully!")
                     # Clear the cached saved graphs so they refresh
                     st.cache_data.clear()
+                    st.rerun()
                 else:
                     st.error(f"Failed to save graph: {response.get('error', 'Unknown error')}")
     

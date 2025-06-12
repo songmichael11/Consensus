@@ -11,6 +11,7 @@ from backend.expanded_post.expanded_post_routes import expanded_post
 from backend.feed.feed_routes import feed
 from backend.playground.playground import playground
 from backend.models.models_routes import models
+from backend.make_post.make_post_routes import make_post
 
 def create_app():
     app = Flask(__name__)
@@ -55,6 +56,7 @@ def create_app():
     app.register_blueprint(feed, url_prefix="/feed")
     app.register_blueprint(playground, url_prefix="/playground")
     app.register_blueprint(models, url_prefix="/models")
+    app.register_blueprint(make_post, url_prefix="/make_post")
 
 
     # Don't forget to return the app object
