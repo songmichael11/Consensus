@@ -13,50 +13,6 @@ def HomeNav():
 def AboutPageNav():
     st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
 
-
-#### ------------------------ Examples for Role of Politician ------------------------
-def WorldBankVizNav():
-    st.sidebar.page_link(
-        "pages/01_World_Bank_Viz.py", label="World Bank Visualization", icon="🏦"
-    )
-
-
-def MapDemoNav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
-
-
-## ------------------------ Examples for Role of Voter ------------------------
-def ApiTestNav():
-    st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
-
-
-def PredictionNav():
-    st.sidebar.page_link(
-        "pages/11_Prediction.py", label="Regression Prediction", icon="📈"
-    )
-
-
-def ClassificationNav():
-    st.sidebar.page_link(
-        "pages/13_Classification.py", label="Classification Demo", icon="🌺"
-    )
-
-
-def NgoDirectoryNav():
-    st.sidebar.page_link("pages/14_NGO_Directory.py", label="NGO Directory", icon="📁")
-
-
-def AddNgoNav():
-    st.sidebar.page_link("pages/15_Add_NGO.py", label="Add New NGO", icon="➕")
-
-
-#### ------------------------ Economist Role ------------------------
-def AdminPageNav():
-    st.sidebar.page_link("pages/20_Admin_Home.py", label="System Admin", icon="🖥️")
-    st.sidebar.page_link(
-        "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
-    )
-
 def FeedNav():
     st.sidebar.page_link("pages/00_Feed.py", label="My Feed")
 
@@ -65,10 +21,10 @@ def PlaygroundNav():
 
 # change 
 def SavedGraphsNav():
-    st.sidebar.page_link("pages/11_Prediction.py", label="Saved Graphs")
+    st.sidebar.page_link("Home.py", label="Saved Graphs")
 
 def ProfileNav():
-    st.sidebar.page_link("pages/11_Prediction.py", label="My Profile")
+    st.sidebar.page_link("Home.py", label="My Profile")
 
 # --------------------------------Links Function -----------------------------------------------
 def SideBarLinks(show_home=False):
@@ -95,16 +51,6 @@ def SideBarLinks(show_home=False):
         PlaygroundNav()
         SavedGraphsNav()
         ProfileNav()
-
-        # # Show World Bank Link and Map Demo Link if the user is a political strategy advisor role.
-        # if "Politician" in st.session_state["Roles"]:
-
-        # # If the user role is usaid worker, show the Api Testing page
-        # if "Voter" in st.session_state["Roles"]:
-
-        # # If the user is an administrator, give them access to the administrator pages
-        # if "Economist" in st.session_state["Roles"]:
-
 
     # Always show the About page at the bottom of the list of links
     AboutPageNav()
