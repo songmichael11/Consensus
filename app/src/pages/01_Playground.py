@@ -321,8 +321,14 @@ col1, col2, col3 = st.columns([0.75, 0.05, 0.4])
 
 with col1:
     
-    json_of_presets = fetch_preset_options() # NOTE : working here
-    country_options = [entry["Reference_area"] for entry in json_of_presets["data"]]
+    json_of_presets = fetch_preset_options() # NOTE : working here rn
+    
+    # Add error handling for the API response
+    if json_of_presets and "data" in json_of_presets:
+        country_options = [f"{entry['Reference_area']} ({entry['Time_period']})" for entry in json_of_presets["data"]]
+    else:
+        country_options = ["No presets available"]  # Fallback option
+        st.error("Failed to load presets from the server. Please check your connection.")
     
     st.markdown("### Presets:")
     preset_options = country_options

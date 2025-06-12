@@ -281,7 +281,7 @@ def get_presets():
         return jsonify({
             "message": "preset grabbing function for data playground executed",
             "data": preset_values
-        }), 201
+        }), 200
         
     except Error as e:
         current_app.logger.error(f"Database error in get_presets: {str(e)}")
