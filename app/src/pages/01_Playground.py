@@ -21,6 +21,21 @@ st.markdown("*Explore how different economic factors affect income inequality.*"
 # Sidebar
 SideBarLinks()
 
+# Feature variable mapping to match backend expectations
+FEATURE_MAPPING = {
+    "Population": "Population",
+    "GDP per capita": "GDP_per_capita", 
+    "Trade union density": "Trade_union_density",
+    "Unemployment rate": "Unemployment_rate",
+    "Health": "Health",
+    "Education": "Education", 
+    "Housing": "Housing",
+    "Community development": "Community_development",
+    "Productivity": "Productivity",
+    "Inflation": "Inflation",
+    "IRLT": "IRLT"
+}
+
 # API Functions
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def fetch_available_features():
@@ -76,76 +91,17 @@ def load_graph_from_backend(graph_id):
             return None
     except requests.exceptions.RequestException:
         return None
-
-# Feature variable mapping to match backend expectations
-FEATURE_MAPPING = {
-    "Population": "Population",
-    "GDP per capita": "GDP_per_capita", 
-    "Trade union density": "Trade_union_density",
-    "Unemployment rate": "Unemployment_rate",
-    "Health": "Health",
-    "Education": "Education", 
-    "Housing": "Housing",
-    "Community development": "Community_development",
-    "Productivity": "Productivity",
-    "Inflation": "Inflation",
-    "IRLT": "IRLT"
-}
-
-# Global presets data - hardcoded for simplicity and performance
-PRESETS = {
-    "Norway (2019)": {
-        "Population": 5347896.0,
-        "GDP_per_capita": 76430.5889473338,
-        "Trade_union_density": 50.400002,
-        "Unemployment_rate": 3.875,
-        "Health": 0.0862369844120149,
-        "Education": 0.0555386430176563,
-        "Housing": 0.0012874843234674,
-        "Community_development": 0.0,
-        "Productivity": None,  # No matching field in provided data
-        "Inflation": 2.16773003305402,
-        "IRLT": 1.49416666666667,
-        "Region_East_Asia_and_Pacific": 0,
-        "Region_Europe_and_Central_Asia": 1,
-        "Region_Latin_America_and_Caribbean": 0,
-        "Region_Middle_East_and_North_Africa": 0
-    },
-    "Poland (2017)": {
-        "Population": 37974826.0,
-        "GDP_per_capita": 13913.3402919927,
-        "Trade_union_density": 13.4,
-        "Unemployment_rate": 4.95833333333333,
-        "Health": 0.0466635016592139,
-        "Education": 0.048813522992945,
-        "Housing": 0.0003903625535562,
-        "Community_development": 0.000481326458453,
-        "Productivity": None,
-        "Inflation": 2.0759355367385,
-        "IRLT": 3.42,
-        "Region_East_Asia_and_Pacific": 0,
-        "Region_Europe_and_Central_Asia": 1,
-        "Region_Latin_America_and_Caribbean": 0,
-        "Region_Middle_East_and_North_Africa": 0
-    },
-    "Portugal (2016)": {
-        "Population": 10325452.0,
-        "GDP_per_capita": 19980.2808866516,
-        "Trade_union_density": 15.3,
-        "Unemployment_rate": 11.475,
-        "Health": 0.0611153783913612,
-        "Education": 0.0477369580696354,
-        "Housing": 0.0023626903656236,
-        "Community_development": 0.0018257250377291,
-        "Productivity": None,
-        "Inflation": 0.607397074641719,
-        "IRLT": 3.1725,
-        "Region_East_Asia_and_Pacific": 0,
-        "Region_Europe_and_Central_Asia": 1,
-        "Region_Latin_America_and_Caribbean": 0,
-        "Region_Middle_East_and_North_Africa": 0
-    }
-}
+    
+def fetch_preset_options():
+    """Load presets for playground dropdown"""
+    try:
+        response = requests.get(f"{API_BASE_URL}/playground/presets", timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+    except requests.exceptions.RequestException:
+        return None
 
 def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
     """Generate real GINI predictions using the actual model in the backend API"""
