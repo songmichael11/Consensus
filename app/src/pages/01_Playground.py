@@ -50,6 +50,38 @@ def fetch_available_features():
         st.error(f"Error connecting to backend: {str(e)}")
         return None
 
+def load_preset(preset_data):
+    """Load a preset's data into the session state"""
+    if not preset_data:
+        return False
+        
+    # Map the region to the expected format
+    region_name = preset_data.get("Region", "Europe and Central Asia")
+    east_asia, europe, latin_america, middle_east = map_regions(region_name)
+    
+    # Create the preset data structure
+    preset_values = {
+        "Population": int(preset_data.get("Population", 22000000)),
+        "GDP_per_capita": float(preset_data.get("GDP_per_capita", 41000.0)),
+        "Trade_union_density": float(preset_data.get("Trade_union_density", 33.0)),
+        "Unemployment_rate": float(preset_data.get("Unemployment_rate", 8.0)),
+        "Health": float(preset_data.get("Health", 0.064)),
+        "Education": float(preset_data.get("Education", 0.052)),
+        "Housing": float(preset_data.get("Housing", 0.0032)),
+        "Community_development": float(preset_data.get("Community_development", 0.0019)),
+        "Corporate_tax_rate": float(preset_data.get("Corporate_tax_rate", 21.0)),
+        "Inflation": float(preset_data.get("Inflation", 2.1)),
+        "IRLT": float(preset_data.get("IRLT", 7.9)),
+        "Region_East_Asia_and_Pacific": east_asia,
+        "Region_Europe_and_Central_Asia": europe,
+        "Region_Latin_America_and_Caribbean": latin_america,
+        "Region_Middle_East_and_North_Africa": middle_east
+    }
+    
+    # Store the preset data in session state
+    st.session_state.selected_preset = preset_values
+    return True
+
 def save_graph_to_backend(user_id, graph_name, x_axis, x_min, x_max, x_steps, feature_values):
     """Save graph configuration to backend"""
     try:
@@ -185,6 +217,14 @@ if st.session_state.available_features is None:
             st.session_state.available_features = list(FEATURE_MAPPING.keys())
             st.warning("⚠️ Backend unavailable - using default features")
 
+# This entire if statement loads and applies the first preset which should currently be Sweden (2019)
+if 'selected_preset' not in st.session_state and 'loaded_graph' not in st.session_state:
+    json_of_presets = fetch_preset_options()
+    if json_of_presets and "data" in json_of_presets and json_of_presets["data"]:
+        preset_data = json_of_presets["data"]
+        first_preset = preset_data[0]
+        
+        load_preset(first_preset)
 
 # Show current user info in sidebar
 with st.sidebar:
@@ -249,7 +289,7 @@ col1, col2, col3 = st.columns([0.75, 0.05, 0.4])
 
 with col1:
     
-    json_of_presets = fetch_preset_options() # NOTE : working here rn
+    json_of_presets = fetch_preset_options()
     
     # Error handling for API response
     if json_of_presets and "data" in json_of_presets:
@@ -275,33 +315,9 @@ with col1:
             data_index = country_options.index(selected_index)
             matching_entry = preset_data[data_index]
             
-            # Map the region to the expected format
-            region_name = matching_entry.get("Region", "Europe and Central Asia")
-            east_asia, europe, latin_america, middle_east = map_regions(region_name)
-            
-            # Create the preset data structure
-            preset_values = {
-                "Population": int(matching_entry.get("Population", 22000000)),  # Convert to int
-                "GDP_per_capita": float(matching_entry.get("GDP_per_capita", 41000.0)),  # Convert to float
-                "Trade_union_density": float(matching_entry.get("Trade_union_density", 33.0)),
-                "Unemployment_rate": float(matching_entry.get("Unemployment_rate", 8.0)),
-                "Health": float(matching_entry.get("Health", 0.064)),
-                "Education": float(matching_entry.get("Education", 0.052)),
-                "Housing": float(matching_entry.get("Housing", 0.0032)),
-                "Community_development": float(matching_entry.get("Community_development", 0.0019)),
-                "Corporate_tax_rate": float(matching_entry.get("Corporate_tax_rate", 21.0)),
-                "Inflation": float(matching_entry.get("Inflation", 2.1)),
-                "IRLT": float(matching_entry.get("IRLT", 7.9)),
-                "Region_East_Asia_and_Pacific": east_asia,
-                "Region_Europe_and_Central_Asia": europe,
-                "Region_Latin_America_and_Caribbean": latin_america,
-                "Region_Middle_East_and_North_Africa": middle_east
-            }
-            
-            # Store the selected preset data in session state
-            st.session_state.selected_preset = preset_values
-            st.success(f"Applied preset: {selected_index}")
-            st.rerun()
+            if load_preset(matching_entry):
+                st.success(f"Applied preset: {selected_index}")
+                st.rerun()
         else:
             st.error("No preset data available")
 
