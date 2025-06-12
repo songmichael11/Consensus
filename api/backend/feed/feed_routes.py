@@ -8,14 +8,6 @@ feed = Blueprint("feed", __name__)
 
 # ---This blueprint is for the feed page of the site---
 
-# GET (to populate user feed)
-# Tables accessed: posts, users, graphs, bookmarked user
-# Parameters:
-# Sort by (default most recent)
-# Filter by (multiple enumerations/modes for this)
-# Search by (takes a postName)
-
-
 
 # get all feed information needed to populate a user's feed for a particular user
 @feed.route("/posts/<int:user_id>", methods=["GET"])
@@ -109,60 +101,3 @@ def get_feed(user_id):
         return jsonify({"error": str(e)}), 500
     
 
-# when a post is expanded, gets the questions and answers for a post
-@feed.route("/questions/<int:post_id>", methods=["GET"])
-def get_questions(post_id):
-    try:
-        current_app.logger.info(f"""Starting get_questions request""")
-        cursor = db.get_db().cursor()
-
-        query = """SELECT q.IsHidden,
-                        q.CreatedAt,
-                        q.QuestionText,
-                        a.AnswerText,
-                        u.Name AS answerAuthor
-                    FROM Questions q
-                        LEFT JOIN Answers a 
-                            ON q.QuestionID = a.AnswerID
-                        LEFT JOIN Users u 
-                            ON u.UserID = a.UserID
-                    WHERE q.PostID = %s"""
-        params = int(post_id)
-
-        current_app.logger.debug(f'Executing query: {query}', params)
-        cursor.execute(query, params)
-        questions = cursor.fetchall()
-        cursor.close()
-        
-        return jsonify(questions), 200
-
-    except Error as e:
-            return jsonify({"error": str(e)}), 500
-    
-# when a post is expanded, gets the expert opinions
-@feed.route("/exops/<int:post_id>", methods=["GET"])
-def get_exops(post_id):
-    try:
-        current_app.logger.info(f"""Starting get_exops request""")
-        cursor = db.get_db().cursor()
-
-        query = """SELECT eo.BodyText,
-                        eo.CreatedAt,
-                        u.Name AS answerAuthor
-                    FROM ExpertOpinions eo
-                        LEFT JOIN ExpertOpUsers eou 
-                            ON eo.ExpertOpID = eou.ExpertOpID
-                        LEFT JOIN Users u 
-                            ON u.UserID = eou.UserID
-                    WHERE eo.PostID = %s"""
-        params = int(post_id)
-
-        current_app.logger.debug(f'Executing query: {query}', params)
-        cursor.execute(query, params)
-        questions = cursor.fetchall()
-        cursor.close()
-        
-        return jsonify(questions), 200
-
-    except Error as e:
-            return jsonify({"error": str(e)}), 500
