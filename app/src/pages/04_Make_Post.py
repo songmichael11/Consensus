@@ -5,12 +5,14 @@ import streamlit as st
 import requests
 from modules.nav import SideBarLinks
 import plotly.graph_objects as go
+import time
 
 # page setup
 st.set_page_config(layout='wide')
 
 def sendPost(body):
-    
+    url = f"http://web-api:4000/make_post/post/{st.session_state.get('UserID', None)}"
+    return requests.post(url, json=body)
 
 # renders plotly graph from a graphid
 def renderPlotlyGraph(graphID):
@@ -47,7 +49,7 @@ postDraft = {}
 with st.container(border=True):
     postDraft["Title"] = st.text_input(label="Title", placeholder="Title Here", label_visibility="hidden", max_chars=255)
     postDraft["Description"] = st.text_area(label="Description", placeholder="Write your Description Here", label_visibility="hidden")
-    postDraft["GraphID"]
+    postDraft["GraphID"] = graphID
     st.write("Your Graph:")
     renderPlotlyGraph(graphID)
     c1, c2 = st.columns([0.87, 0.13])
@@ -57,4 +59,14 @@ with st.container(border=True):
                 del st.session_state["PostedGraph"]
             st.switch_page("pages/03_SavedPosts.py")
     with c2:
-        st.button("Make Post")
+        if st.button("Make Post"):
+            response = sendPost(postDraft)
+            if response.status_code == 200:
+                st.badge("Post Created!", color="green")
+                with st.spinner(text="Redirecting to feed...", show_time=False):
+                    time.sleep(1)
+                    if "PostedGraph" in st.session_state:
+                        del st.session_state["PostedGraph"]
+                    st.switch_page("pages/00_Feed.py")
+            else:
+                st.badge("Error. Please try again.", color="red")
