@@ -52,26 +52,26 @@ with a2:
 
     with b1:
         voter_names = getUserNames(1)
-        voter_name = st.selectbox(label="Voters: ", options=voter_names.keys)
+        voter_name = st.selectbox(label="Voters: ", options=list(voter_names.keys()))
         if st.button(f"Log in as Voter, {voter_name}", use_container_width=True):
-            updateSessionState(1)
+            updateSessionState(voter_names[voter_name])
             st.success("Logged in as Voter")
             st.switch_page('pages/00_Feed.py')
 
     with b2:
         politician_names = getUserNames(2)
-        politician_name = st.selectbox(label="Politicians: ", options=politician_names.keys)
+        politician_name = st.selectbox(label="Politicians: ", options=list(politician_names.keys()))
 
         if st.button(f"Log in as Politician, {politician_name}", use_container_width=True):
-            updateSessionState(7)
+            updateSessionState(politician_names[politician_name])
             st.success("Logged in as Politician")
             st.switch_page('pages/00_Feed.py')
 
     with b3:
         economist_names = getUserNames(3)
-        economist_name = st.selectbox(label="Economists: ", options=economist_names.keys())
+        economist_name = st.selectbox(label="Economists: ", options=list(economist_names.keys()))
         if st.button(f"Log in as Economist, {economist_name}", use_container_width=True):
-            updateSessionState(13)
+            updateSessionState(economist_names[economist_name])
             st.success("Logged in as Economist")
             st.switch_page('pages/00_Feed.py')
 
