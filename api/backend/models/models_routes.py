@@ -2,8 +2,9 @@ from flask import Blueprint, jsonify, request, current_app
 from backend.db_connection import db
 from mysql.connector import Error
 import numpy as np
-from backend.ml_models.logistic import predict_gini
-
+from backend.ml_models.logistic import predict_gini 
+from tensorflow.keras.models import load_model
+import os
 
 
 FEATURES_NO_REGION = """Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
@@ -68,6 +69,20 @@ def get_playground_predictions():
         current_app.logger.error(f"Error in gini_plot: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+# POST request to get a plotly prediction graph for the data playground BUT USING DEEP NEURAL NETWORK
+@models.route("/playground/predict/deep_neural_network", methods=["POST"]) # NOTE: work in progress
+def get_playground_predictions_deep_neural_network():
+    try:
+        row = request.get_json()
+        current_app.logger.info(row)
+
+        output = predict_from_features_deep_neural_network(row)
+        return output
+
+    except Exception as e:
+        current_app.logger.error(f"Error in deep neural network route: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 @models.route("/playground/stds", methods=["GET"])
 def get_stds():
     try:
@@ -110,6 +125,68 @@ def predict_from_features(row):
 
         cursor.close()
 
+        columns = [col for col in rows[0].keys() if col != 'Metric']
+
+        describe = [
+            [row[col] for col in columns] for row in rows
+            ]
+
+        # get XAxis and range
+        x_axis = row["XAxis"]
+        x_min = row["XMin"]
+        x_max = row["XMax"]
+        num_steps = int(row["XStep"])  
+        x_values = np.linspace(x_min, x_max, num_steps)
+
+        gini_values = []
+
+        current_app.logger.info(f"Predicting GINI for {len(x_values)} points")
+
+        for x_val in x_values:
+            x_input = row.copy()
+
+            x_input[x_axis] = x_val
+            
+            x_input.pop("XAxis", None)
+            x_input.pop("XMin", None)
+            x_input.pop("XMax", None)
+            x_input.pop("XStep", None)
+
+            x_input = list(x_input.values())
+
+            gini = predict_gini(np.array(x_input), describe=np.array(describe), weights=np.array(weights), model="logistic")
+
+            gini_values.append(gini)
+
+        output = {}
+        output["x_values"] = x_values.tolist()
+        output["predictions"] = gini_values
+        output["x_axis"] = FEATURE_MAP[x_axis]
+
+        current_app.logger.info(output)
+
+        return jsonify(output)
+    except Exception as e:
+        current_app.logger.error(f"Error in gini_plot: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
+# DNN function! abstracted prediction function for routes that use Deep Neural Network model.
+# takes in a list of feature values and output a jsonified set of outputs
+def predict_from_features_deep_neural_network(row): # NOTE: work in progress
+    try:
+        # load in the keras model from ../ml_models/Unemployment.keras
+        model = load_model(os.path.join(os.path.dirname(__file__), 'ml_models', 'Unemployment.keras'))
+        current_app.logger.info(model)
+
+        # run a prediction on the model
+        prediction = model.predict(row)
+        current_app.logger.info(prediction)
+
+        # return the prediction
+        return jsonify({"prediction": prediction.tolist()})
+
+    except Exception as e:
+        current_app.logger.error(f"Error in deep neural network route: {str(e)}")
         columns = [col for col in rows[0].keys() if col != 'Metric']
 
         describe = [
