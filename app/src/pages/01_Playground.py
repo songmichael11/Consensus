@@ -167,6 +167,7 @@ if not user_id:
         st.switch_page('Home.py')
     st.stop()
 
+
 # Fetch available features from backend
 if st.session_state.available_features is None:
     with st.spinner("Loading available features..."):

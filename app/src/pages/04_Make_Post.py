@@ -9,6 +9,9 @@ import plotly.graph_objects as go
 # page setup
 st.set_page_config(layout='wide')
 
+def sendPost(body):
+    
+
 # renders plotly graph from a graphid
 def renderPlotlyGraph(graphID):
     response = requests.get(f"http://web-api:4000/models/posts/predict/{graphID}")
@@ -19,7 +22,6 @@ def renderPlotlyGraph(graphID):
                         margin=dict(t=75, b=50, l=50, r=10),
                         height=300)
     st.plotly_chart(fig, key=f"plot{graphID}")
-
 
 # load user info from session
 user_id = st.session_state.get('UserID', None)
@@ -41,11 +43,11 @@ SideBarLinks()
 st.markdown("# Make Post:")
 
 postDraft = {}
-postDraft['UserID'] = user_id
 
 with st.container(border=True):
     postDraft["Title"] = st.text_input(label="Title", placeholder="Title Here", label_visibility="hidden", max_chars=255)
     postDraft["Description"] = st.text_area(label="Description", placeholder="Write your Description Here", label_visibility="hidden")
+    postDraft["GraphID"]
     st.write("Your Graph:")
     renderPlotlyGraph(graphID)
     c1, c2 = st.columns([0.87, 0.13])
