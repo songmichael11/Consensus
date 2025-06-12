@@ -21,6 +21,21 @@ st.markdown("*Explore how different economic factors affect income inequality.*"
 # Sidebar
 SideBarLinks()
 
+# Feature variable mapping to match backend expectations
+FEATURE_MAPPING = {
+    "Population": "Population",
+    "GDP per capita": "GDP_per_capita", 
+    "Trade union density": "Trade_union_density",
+    "Unemployment rate": "Unemployment_rate",
+    "Health": "Health",
+    "Education": "Education", 
+    "Housing": "Housing",
+    "Community development": "Community_development",
+    "Productivity": "Productivity",
+    "Inflation": "Inflation",
+    "IRLT": "IRLT"
+}
+
 # API Functions
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def fetch_available_features():
@@ -76,76 +91,17 @@ def load_graph_from_backend(graph_id):
             return None
     except requests.exceptions.RequestException:
         return None
-
-# Feature variable mapping to match backend expectations
-FEATURE_MAPPING = {
-    "Population": "Population",
-    "GDP per capita": "GDP_per_capita", 
-    "Trade union density": "Trade_union_density",
-    "Unemployment rate": "Unemployment_rate",
-    "Health": "Health",
-    "Education": "Education", 
-    "Housing": "Housing",
-    "Community development": "Community_development",
-    "Productivity": "Productivity",
-    "Inflation": "Inflation",
-    "IRLT": "IRLT"
-}
-
-# Global presets data - hardcoded for simplicity and performance
-PRESETS = {
-    "Norway (2019)": {
-        "Population": 5347896.0,
-        "GDP_per_capita": 76430.5889473338,
-        "Trade_union_density": 50.400002,
-        "Unemployment_rate": 3.875,
-        "Health": 0.0862369844120149,
-        "Education": 0.0555386430176563,
-        "Housing": 0.0012874843234674,
-        "Community_development": 0.0,
-        "Productivity": None,  # No matching field in provided data
-        "Inflation": 2.16773003305402,
-        "IRLT": 1.49416666666667,
-        "Region_East_Asia_and_Pacific": 0,
-        "Region_Europe_and_Central_Asia": 1,
-        "Region_Latin_America_and_Caribbean": 0,
-        "Region_Middle_East_and_North_Africa": 0
-    },
-    "Poland (2017)": {
-        "Population": 37974826.0,
-        "GDP_per_capita": 13913.3402919927,
-        "Trade_union_density": 13.4,
-        "Unemployment_rate": 4.95833333333333,
-        "Health": 0.0466635016592139,
-        "Education": 0.048813522992945,
-        "Housing": 0.0003903625535562,
-        "Community_development": 0.000481326458453,
-        "Productivity": None,
-        "Inflation": 2.0759355367385,
-        "IRLT": 3.42,
-        "Region_East_Asia_and_Pacific": 0,
-        "Region_Europe_and_Central_Asia": 1,
-        "Region_Latin_America_and_Caribbean": 0,
-        "Region_Middle_East_and_North_Africa": 0
-    },
-    "Portugal (2016)": {
-        "Population": 10325452.0,
-        "GDP_per_capita": 19980.2808866516,
-        "Trade_union_density": 15.3,
-        "Unemployment_rate": 11.475,
-        "Health": 0.0611153783913612,
-        "Education": 0.0477369580696354,
-        "Housing": 0.0023626903656236,
-        "Community_development": 0.0018257250377291,
-        "Productivity": None,
-        "Inflation": 0.607397074641719,
-        "IRLT": 3.1725,
-        "Region_East_Asia_and_Pacific": 0,
-        "Region_Europe_and_Central_Asia": 1,
-        "Region_Latin_America_and_Caribbean": 0,
-        "Region_Middle_East_and_North_Africa": 0
-    }
-}
+    
+def fetch_preset_options():
+    """Load presets for playground dropdown"""
+    try:
+        response = requests.get(f"{API_BASE_URL}/playground/presets", timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+    except requests.exceptions.RequestException:
+        return None
 
 def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
     """Generate real GINI predictions using the actual model in the backend API"""
@@ -309,17 +265,63 @@ else:
 col1, col2, col3 = st.columns([0.75, 0.05, 0.4])
 
 with col1:
-    st.markdown("### Presets:")
     
-    preset_options = ["None"] + list(PRESETS.keys())
-    selected_preset = st.selectbox("", preset_options, key="preset_select")
+    json_of_presets = fetch_preset_options() # NOTE : working here rn
+    
+    # Error handling for API response
+    if json_of_presets and "data" in json_of_presets:
+        # Unpacking json response, grabbing just the data
+        preset_data = json_of_presets["data"]
+        # Making the strings for preset dropdown
+        country_options = [f"{entry['Reference_area']} ({entry['Time_period']})" for entry in preset_data]
+    else:
+        # make the dropdown empty if the api call fails
+        preset_data = []
+        country_options = ["No presets available"]  # Fallback option
+        st.error("Failed to load presets from API.")
+    
+    st.markdown("### Presets:")
+    # Stores the index of the selected preset
+    selected_index = st.selectbox("", country_options, key="preset_select", index=0)
     
     # Apply preset button
-    if selected_preset != "None" and st.button("📋 Apply Preset", use_container_width=True):
-        # Store the selected preset data in session state
-        st.session_state.selected_preset = PRESETS[selected_preset]
-        st.success(f"Applied preset: {selected_preset}")
-        st.rerun()
+    if selected_index != "No presets available" and st.button("📋 Apply Preset", use_container_width=True):
+        # If the api call was successful then we can grab the data from the selected preset
+        if preset_data:
+            # Get the index for the selected preset, then grab the data from that index
+            data_index = country_options.index(selected_index)
+            matching_entry = preset_data[data_index]
+            
+            # Map the region to the expected format
+            region_name = matching_entry.get("Region", "Europe and Central Asia")
+            east_asia, europe, latin_america, middle_east = map_regions(region_name)
+            
+            # Create the preset data structure
+            preset_values = {
+                "Population": int(matching_entry.get("Population", 22000000)),  # Convert to int
+                "GDP_per_capita": float(matching_entry.get("GDP_per_capita", 41000.0)),  # Convert to float
+                "Trade_union_density": float(matching_entry.get("Trade_union_density", 33.0)),
+                "Unemployment_rate": float(matching_entry.get("Unemployment_rate", 8.0)),
+                "Health": float(matching_entry.get("Health", 0.064)),
+                "Education": float(matching_entry.get("Education", 0.052)),
+                "Housing": float(matching_entry.get("Housing", 0.0032)),
+                "Community_development": float(matching_entry.get("Community_development", 0.0019)),
+                "Corporate_tax_rate": float(matching_entry.get("Corporate_tax_rate", 21.0)),
+                "Inflation": float(matching_entry.get("Inflation", 2.1)),
+                "IRLT": float(matching_entry.get("IRLT", 7.9)),
+                "Region_East_Asia_and_Pacific": east_asia,
+                "Region_Europe_and_Central_Asia": europe,
+                "Region_Latin_America_and_Caribbean": latin_america,
+                "Region_Middle_East_and_North_Africa": middle_east
+            }
+            
+            # Store the selected preset data in session state
+            st.session_state.selected_preset = preset_values
+            st.success(f"Applied preset: {selected_index}")
+            st.rerun()
+        else:
+            st.error("No preset data available")
+
     st.markdown("")
 
     # Feature buttons — 4x4 grid to accommodate all features
@@ -331,18 +333,23 @@ with col1:
         loaded_graph = st.session_state.get('loaded_graph', None)
         selected_preset_data = st.session_state.get('selected_preset', None)
         
-        def get_default_value(feature_key, fallback_default):
+        def get_default_value(feature_key, fallback_default, as_int=False):
             """Get default value with priority: loaded graph > preset > fallback"""
+            value = fallback_default
             if loaded_graph and 'features' in loaded_graph:
-                return loaded_graph['features'].get(feature_key, fallback_default)
+                value = loaded_graph['features'].get(feature_key, fallback_default)
             elif selected_preset_data:
-                return selected_preset_data.get(feature_key, fallback_default)
+                value = selected_preset_data.get(feature_key, fallback_default)
+            
+            # Convert to int if requested (for fields like Population)
+            if as_int:
+                return int(value)
             else:
-                return fallback_default
+                return float(value)
 
         with feature_cols[0]:
             population = st.number_input("Population:", 
-                                    value=get_default_value('Population', 22000000), 
+                                    value=get_default_value('Population', 22000000, as_int=True), 
                                     key="population", 
                                     min_value=0,
                                     step=1000000,
@@ -422,8 +429,6 @@ with col1:
             irlt = st.number_input("IRLT:", 
                                 value=get_default_value('IRLT', 7.9), 
                                 key="irlt",
-                                min_value=0.0,
-                                max_value=100.0,
                                 step=1.0,
                                 format='%.1f',
                                 help="Percent interest paid on long-term bonds and loans.  \n**Min:** 0 **Max:** 100 **Avg:** 3.5")   
@@ -433,7 +438,7 @@ with col1:
                                                       "Middle East and North Africa"],
                                     help="Region of the world country is located.")
             east_asia, europe, latin_america, middle_east = map_regions(region)
-            # Add some spacing for visual balance
+            # Add some spacing for cleaner ui
             st.markdown("")
             st.markdown("")
 
@@ -505,7 +510,7 @@ with col3:
 
     x_min = st.number_input("Min:", value=float(default_x_min), key="x_min", format='%.4f')
     x_max = st.number_input("Max:", value=float(default_x_max), key="x_max", format='%.4f')
-    steps = st.number_input("Steps:", value=int(default_steps), min_value=5, max_value=100, key="steps")
+    steps = st.number_input("Steps:", value=int(default_steps), min_value=5, max_value=100, step=1, key="steps")
     
     st.markdown("")
     

@@ -133,7 +133,7 @@ def renderEndorsement(post):
 SideBarLinks()
 
 #page title
-st.markdown(f"### {st.session_state['Roles'][0]} Feed")
+st.markdown(f"### My Feed")
 
 #page header
 header_col1, header_col2, header_col3 = st.columns([1, 1, 2])
