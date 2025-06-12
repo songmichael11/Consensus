@@ -333,18 +333,23 @@ with col1:
         loaded_graph = st.session_state.get('loaded_graph', None)
         selected_preset_data = st.session_state.get('selected_preset', None)
         
-        def get_default_value(feature_key, fallback_default):
+        def get_default_value(feature_key, fallback_default, as_int=False):
             """Get default value with priority: loaded graph > preset > fallback"""
+            value = fallback_default
             if loaded_graph and 'features' in loaded_graph:
-                return loaded_graph['features'].get(feature_key, fallback_default)
+                value = loaded_graph['features'].get(feature_key, fallback_default)
             elif selected_preset_data:
-                return selected_preset_data.get(feature_key, fallback_default)
+                value = selected_preset_data.get(feature_key, fallback_default)
+            
+            # Convert to int if requested (for fields like Population)
+            if as_int:
+                return int(value)
             else:
-                return fallback_default
+                return float(value)
 
         with feature_cols[0]:
             population = st.number_input("Population:", 
-                                    value=get_default_value('Population', 22000000), 
+                                    value=get_default_value('Population', 22000000, as_int=True), 
                                     key="population", 
                                     min_value=0,
                                     step=1000000,
@@ -507,7 +512,7 @@ with col3:
 
     x_min = st.number_input("Min:", value=float(default_x_min), key="x_min", format='%.4f')
     x_max = st.number_input("Max:", value=float(default_x_max), key="x_max", format='%.4f')
-    steps = st.number_input("Steps:", value=int(default_steps), min_value=5, max_value=100, key="steps")
+    steps = st.number_input("Steps:", value=int(default_steps), min_value=5, max_value=100, step=1, key="steps")
     
     st.markdown("")
     

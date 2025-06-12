@@ -60,12 +60,11 @@ def save_graph():
         insert_graph_query = """
             INSERT INTO Graphs (XAxis, XMin, XMax, XStep, Population, GDP_per_capita, 
                               Trade_union_density, Unemployment_rate, Health, Education, 
-                              Housing, Community_development, Real_interest_rates, 
-                              Productivity, Corporate_tax_rate, Inflation, 
-                              Personal_property_tax, IRLT, Region_East_Asia_and_Pacific, 
+                              Housing, Community_development, Corporate_tax_rate, Inflation, 
+                              IRLT, Region_East_Asia_and_Pacific, 
                               Region_Europe_and_Central_Asia, Region_Latin_America_and_Caribbean, 
                               Region_Middle_East_and_North_Africa)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         
         graph_values = (
@@ -74,9 +73,8 @@ def save_graph():
             feature_values['Trade_union_density'], feature_values['Unemployment_rate'],
             feature_values['Health'], feature_values['Education'],
             feature_values['Housing'], feature_values['Community_development'],
-            feature_values['Real_interest_rates'], feature_values['Productivity'],
             feature_values['Corporate_tax_rate'], feature_values['Inflation'],
-            feature_values['Personal_property_tax'], feature_values['IRLT'],
+            feature_values['IRLT'],
             feature_values['Region_East_Asia_and_Pacific'], feature_values['Region_Europe_and_Central_Asia'],
             feature_values['Region_Latin_America_and_Caribbean'], feature_values['Region_Middle_East_and_North_Africa']
         )
@@ -120,8 +118,7 @@ def get_saved_graphs(user_id):
             SELECT sg.Name, sg.DateTimeSaved, g.GraphID, g.XAxis, g.XMin, g.XMax, g.XStep,
                    g.Population, g.GDP_per_capita, g.Trade_union_density, g.Unemployment_rate,
                    g.Health, g.Education, g.Housing, g.Community_development, 
-                   g.Real_interest_rates, g.Productivity, g.Corporate_tax_rate, g.Inflation,
-                   g.Personal_property_tax, g.IRLT, g.Region_East_Asia_and_Pacific,
+                   g.Corporate_tax_rate, g.Inflation, g.IRLT, g.Region_East_Asia_and_Pacific,
                    g.Region_Europe_and_Central_Asia, g.Region_Latin_America_and_Caribbean,
                    g.Region_Middle_East_and_North_Africa
             FROM SavedGraphs sg
@@ -152,11 +149,8 @@ def get_saved_graphs(user_id):
                     "Education": row["Education"],
                     "Housing": row["Housing"],
                     "Community_development": row["Community_development"],
-                    "Real_interest_rates": row["Real_interest_rates"],
-                    "Productivity": row["Productivity"],
                     "Corporate_tax_rate": row["Corporate_tax_rate"],
                     "Inflation": row["Inflation"],
-                    "Personal_property_tax": row["Personal_property_tax"],
                     "IRLT": row["IRLT"],
                     "Region_East_Asia_and_Pacific": row["Region_East_Asia_and_Pacific"],
                     "Region_Europe_and_Central_Asia": row["Region_Europe_and_Central_Asia"],
@@ -213,11 +207,8 @@ def get_graph(graph_id):
                 "Education": result["Education"],
                 "Housing": result["Housing"],
                 "Community_development": result["Community_development"],
-                "Real_interest_rates": result["Real_interest_rates"],
-                "Productivity": result["Productivity"],
                 "Corporate_tax_rate": result["Corporate_tax_rate"],
                 "Inflation": result["Inflation"],
-                "Personal_property_tax": result["Personal_property_tax"],
                 "IRLT": result["IRLT"],
                 "Region_East_Asia_and_Pacific": result["Region_East_Asia_and_Pacific"],
                 "Region_Europe_and_Central_Asia": result["Region_Europe_and_Central_Asia"],
