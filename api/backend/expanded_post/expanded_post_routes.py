@@ -59,4 +59,53 @@ def get_one_post(post_id, user_id):
         return jsonify({"error": str(e)}), 500
 
 
-# 
+# post request to ask a question for a specific post, from a specific user
+@expanded_post.route("/question/post/<int:post_id>/user/<int:user_id>", methods=["POST"])
+def post_question(post_id, user_id):
+    try:
+        current_app.logger.info(f"Starting post_question request for post {post_id} by user {user_id}")
+
+        data = request.get_json()
+
+        cursor = db.get_db().cursor()
+
+        # First check if the user has already asked more than 3 questions 
+        check_query = """
+            SELECT COUNT(q.QuestionID) 
+            FROM Questions q
+                JOIN UserQuestions uq
+                    ON q.QuestionID = uq.QuestionID 
+            WHERE uq.UserID = %s AND q.PostID = %s
+        """
+        cursor.execute(check_query, (user_id, post_id))
+        exists = cursor.fetchone()['COUNT(q.QuestionID)'] > 3
+
+        if exists: # If the user has already asked more than 3 questions, return a 210 status
+            current_app.logger.info(f"User {user_id} has already asked more than 3 questions for {post_id}")
+            return jsonify({"message": "User has already asked more than 3 quetions"}), 210
+
+        # insert into questions table
+        insert_query = """
+            INSERT INTO Questions (QuestionText, PostID) 
+            VALUES (%s, %s)
+        """
+        cursor.execute(insert_query, (data["QuestionText"], post_id))
+        db.get_db().commit()
+        new_question_id = cursor.lastrowid
+
+        # insert into bridge table too
+        insert_query = """
+            INSERT INTO UserQuestions (QuestionID, UserID) 
+            VALUES (%s, %s)
+        """
+        cursor.execute(insert_query, (new_question_id, post_id))
+        db.get_db().commit()
+
+        cursor.close()
+
+        current_app.logger.info(f"Successfully added question for post {post_id} by user {user_id}")
+        return jsonify({"message": "Successfully added question to post"}), 200
+
+    except Error as e:
+        current_app.logger.error(f"Database error in post_question: {str(e)}")
+        return jsonify({"error": str(e)}), 500
