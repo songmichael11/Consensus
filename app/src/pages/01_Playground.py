@@ -323,23 +323,59 @@ with col1:
     
     json_of_presets = fetch_preset_options() # NOTE : working here rn
     
-    # Add error handling for the API response
+    # Error handling for API response
     if json_of_presets and "data" in json_of_presets:
-        country_options = [f"{entry['Reference_area']} ({entry['Time_period']})" for entry in json_of_presets["data"]]
+        # Unpacking json response, grabbing just the data
+        preset_data = json_of_presets["data"]
+        # Making the strings for preset dropdown
+        country_options = [f"{entry['Reference_area']} ({entry['Time_period']})" for entry in preset_data]
     else:
+        # make the dropdown empty if the api call fails
+        preset_data = []
         country_options = ["No presets available"]  # Fallback option
-        st.error("Failed to load presets from the server. Please check your connection.")
+        st.error("Failed to load presets from API.")
     
     st.markdown("### Presets:")
-    preset_options = country_options
-    selected_preset = st.selectbox("", preset_options, key="preset_select")
+    # Stores the index of the selected preset
+    selected_index = st.selectbox("", country_options, key="preset_select", index=0)
     
     # Apply preset button
-    if selected_preset != "None" and st.button("📋 Apply Preset", use_container_width=True):
-        # Store the selected preset data in session state
-        st.session_state.selected_preset = PRESETS[selected_preset]
-        st.success(f"Applied preset: {selected_preset}")
-        st.rerun()
+    if selected_index != "No presets available" and st.button("📋 Apply Preset", use_container_width=True):
+        # If the api call was successful then we can grab the data from the selected preset
+        if preset_data:
+            # Get the index for the selected preset, then grab the data from that index
+            data_index = country_options.index(selected_index)
+            matching_entry = preset_data[data_index]
+            
+            # Map the region to the expected format
+            region_name = matching_entry.get("Region", "Europe and Central Asia")
+            east_asia, europe, latin_america, middle_east = map_regions(region_name)
+            
+            # Create the preset data structure
+            preset_values = {
+                "Population": int(matching_entry.get("Population", 22000000)),  # Convert to int
+                "GDP_per_capita": float(matching_entry.get("GDP_per_capita", 41000.0)),  # Convert to float
+                "Trade_union_density": float(matching_entry.get("Trade_union_density", 33.0)),
+                "Unemployment_rate": float(matching_entry.get("Unemployment_rate", 8.0)),
+                "Health": float(matching_entry.get("Health", 0.064)),
+                "Education": float(matching_entry.get("Education", 0.052)),
+                "Housing": float(matching_entry.get("Housing", 0.0032)),
+                "Community_development": float(matching_entry.get("Community_development", 0.0019)),
+                "Corporate_tax_rate": float(matching_entry.get("Corporate_tax_rate", 21.0)),
+                "Inflation": float(matching_entry.get("Inflation", 2.1)),
+                "IRLT": float(matching_entry.get("IRLT", 7.9)),
+                "Region_East_Asia_and_Pacific": east_asia,
+                "Region_Europe_and_Central_Asia": europe,
+                "Region_Latin_America_and_Caribbean": latin_america,
+                "Region_Middle_East_and_North_Africa": middle_east
+            }
+            
+            # Store the selected preset data in session state
+            st.session_state.selected_preset = preset_values
+            st.success(f"Applied preset: {selected_index}")
+            st.rerun()
+        else:
+            st.error("No preset data available")
 
     st.markdown("")
 
@@ -454,7 +490,7 @@ with col1:
                                                       "Middle East and North Africa"],
                                     help="Region of the world country is located.")
             east_asia, europe, latin_america, middle_east = map_regions(region)
-            # Add some spacing for visual balance
+            # Add some spacing for cleaner ui
             st.markdown("")
             st.markdown("")
 
