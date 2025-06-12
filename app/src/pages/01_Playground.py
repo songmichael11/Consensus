@@ -76,6 +76,17 @@ def load_graph_from_backend(graph_id):
             return None
     except requests.exceptions.RequestException:
         return None
+    
+def fetch_preset_options():
+    """Load presets for playground dropdown"""
+    try:
+        response = requests.get(f"{API_BASE_URL}/playground/presets", timeout=10)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+    except requests.exceptions.RequestException:
+        return None
 
 # Feature variable mapping to match backend expectations
 FEATURE_MAPPING = {
@@ -309,9 +320,18 @@ else:
 col1, col2, col3 = st.columns([0.75, 0.05, 0.4])
 
 with col1:
-    st.markdown("### Presets:")
     
-    preset_options = ["None"] + list(PRESETS.keys())
+    json_of_presets = fetch_preset_options() # NOTE : working here rn
+    
+    # Add error handling for the API response
+    if json_of_presets and "data" in json_of_presets:
+        country_options = [f"{entry['Reference_area']} ({entry['Time_period']})" for entry in json_of_presets["data"]]
+    else:
+        country_options = ["No presets available"]  # Fallback option
+        st.error("Failed to load presets from the server. Please check your connection.")
+    
+    st.markdown("### Presets:")
+    preset_options = country_options
     selected_preset = st.selectbox("", preset_options, key="preset_select")
     
     # Apply preset button
