@@ -126,8 +126,9 @@ def renderExpertOps(post):
     data = getExpertOpinions(post["PostID"])
     with st.container(border=True, height=200):
         for opinion in data:
-            st.markdown(f"**{opinion['answerAuthor']}**")
-            st.write(f"{opinion['BodyText']}")
+            with st.container(border=True):
+                st.markdown(f"**{opinion['answerAuthor']}**")
+                st.write(f"{opinion['BodyText']}")
 
 def renderQuestions(post):
     data = getQuestions(post["PostID"])
@@ -158,12 +159,14 @@ def renderExpertInputButton(post):
             elif response.status_code == 210:
                 st.badge("User has already submitted feedback", color="orange")
 
+
 # load user info from session
 user_id = st.session_state.get('UserID', None)
 if not user_id:
     st.error("No user logged in. Please return to home page and log in.")
     if st.button("Return Home"):
         st.switch_page("Home.py")
+
 # load post info from session
 post_id = st.session_state.get("ExpandedPost", {}).get("PostID", None)
 if not post_id:
@@ -212,7 +215,8 @@ with st.container():
             with c3aa:
                 st.markdown("#### Expert Opinions")
             with c3ab:
-                renderExpertInputButton(post)
+                if "Economist" in st.session_state['Roles']:
+                    renderExpertInputButton(post)
             renderExpertOps(post)
     with c3b:
         with st.container(border=True, height=300):
