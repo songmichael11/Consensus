@@ -20,7 +20,3 @@ st.markdown(
 # Add a button to return to home page
 if st.button("Return to Home", type="primary"):
     st.switch_page("Home.py")
-
-# Add a button to return to home page
-if st.button("Skibidi", type="primary"):
-    st.switch_page("pages/40_Skibidi_Demo_Dev.py")

@@ -72,3 +72,8 @@ with a2:
             updateSessionState(13)
             st.success("Logged in as Economist")
             st.switch_page('pages/00_Feed.py')
+
+    if st.button(label="About Us", icon='🧠', use_container_width=True):
+        st.switch_page("pages/30_About.py")
+
+
