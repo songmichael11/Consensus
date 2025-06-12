@@ -76,17 +76,6 @@ def load_graph_from_backend(graph_id):
             return None
     except requests.exceptions.RequestException:
         return None
-    
-def fetch_preset_options():
-    """Load presets for playground dropdown"""
-    try:
-        response = requests.get(f"{API_BASE_URL}/playground/presets", timeout=10)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-    except requests.exceptions.RequestException:
-        return None
 
 # Feature variable mapping to match backend expectations
 FEATURE_MAPPING = {
@@ -320,18 +309,9 @@ else:
 col1, col2, col3 = st.columns([0.75, 0.05, 0.4])
 
 with col1:
-    
-    json_of_presets = fetch_preset_options() # NOTE : working here rn
-    
-    # Add error handling for the API response
-    if json_of_presets and "data" in json_of_presets:
-        country_options = [f"{entry['Reference_area']} ({entry['Time_period']})" for entry in json_of_presets["data"]]
-    else:
-        country_options = ["No presets available"]  # Fallback option
-        st.error("Failed to load presets from the server. Please check your connection.")
-    
     st.markdown("### Presets:")
-    preset_options = country_options
+    
+    preset_options = ["None"] + list(PRESETS.keys())
     selected_preset = st.selectbox("", preset_options, key="preset_select")
     
     # Apply preset button
@@ -340,7 +320,6 @@ with col1:
         st.session_state.selected_preset = PRESETS[selected_preset]
         st.success(f"Applied preset: {selected_preset}")
         st.rerun()
-
     st.markdown("")
 
     # Feature buttons — 4x4 grid to accommodate all features
@@ -457,6 +436,23 @@ with col1:
             # Add some spacing for visual balance
             st.markdown("")
             st.markdown("")
+
+    with st.popover(label="What is the Gini index?"):
+        st.markdown("""The Gini index is a measure of economic inequality in a country from 0 to 1, 
+            where 0 is perfect equality, and 1 is perfect inequality. It is calculated using
+            the Lorenz curve, a curve that displays the distribution of income in a country.""")
+        image_col, description_col = st.columns([.5,.5])
+        
+        with image_col:
+            st.image("assets/gini_graph.png", width=300)
+        
+        with description_col:
+            st.write(""" **Area A** is the area between the Lorenz curve and the _line of perfect equality_,
+                        and **Area B** is the area between the Lorenz curve and the _X axis._
+            """)
+            st.write("The Gini index is calculated as:")
+            st.write("$GINI = \dfrac{ A }{A + B}$")
+
 
 with col3:
     st.markdown("### Currently Comparing:")
