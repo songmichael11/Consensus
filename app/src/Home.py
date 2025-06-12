@@ -49,23 +49,26 @@ with a2:
     b1, b2, b3 = st.columns(3)
 
     with b1:
-        voter_id = st.selectbox(label="Voters: ", options=getUserNames(1))
-        if st.button("Log in as Voter,\nPrince Maximilian", use_container_width=True):
+        voter_names = getUserNames(1)
+        voter_name = st.selectbox(label="Voters: ", options=(row["Name"] for row in voter_names))
+        if st.button(f"Log in as Voter, {voter_name}", use_container_width=True):
             updateSessionState(1)
             st.success("Logged in as Voter")
             st.switch_page('pages/00_Feed.py')
 
     with b2:
-        voter_id = st.selectbox(label="Voters: ", options=getUserNames(1))
+        politician_names = getUserNames(2)
+        politician_name = st.selectbox(label="Politicians: ", options=(row["Name"] for row in politician_names))
 
-        if st.button("Log in as Politician,\nJT Nance", use_container_width=True):
+        if st.button(f"Log in as Politician, {politician_name}", use_container_width=True):
             updateSessionState(7)
             st.success("Logged in as Politician")
             st.switch_page('pages/00_Feed.py')
 
     with b3:
-        voter_id = st.selectbox(label="Voters: ", options=getUserNames(1))
-        if st.button("Log in as Economist,\nEmeka Okonkwo", use_container_width=True):
+        economist_names = getUserNames(3)
+        economist_name = st.selectbox(label="Economists: ", options=(row["Name"] for row in economist_names))
+        if st.button(f"Log in as Economist, {economist_name}", use_container_width=True):
             updateSessionState(13)
             st.success("Logged in as Economist")
             st.switch_page('pages/00_Feed.py')
