@@ -8,10 +8,9 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 from modules.nav import SideBarLinks
-from modules.presets import get_presets
 
 # API Configuration
-API_BASE_URL = "http://web-api:4000"  
+API_BASE_URL = "http://web-api:4000"
 
 # Page setup
 st.set_page_config(layout='wide')
@@ -189,22 +188,6 @@ if st.session_state.available_features is None:
 
 # Show current user info in sidebar
 with st.sidebar:
-    st.markdown("### 👤 Current User")
-    user_name = st.session_state.get('Name', 'Unknown User')
-    user_roles = st.session_state.get('Roles', [])
-    
-    st.info(f"**{user_name}**")
-    if user_roles:
-        st.caption(f"Roles: {', '.join(user_roles)}")
-    
-    # Logout button
-    if st.button("🚪 Logout", use_container_width=True):
-        # Clear session state
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.success("Logged out successfully!")
-        st.switch_page('Home.py')
-    
     st.markdown("---")
     
     # Load saved graphs
@@ -402,7 +385,7 @@ with col1:
                                     step=.001,
                                     format='%.4f',
                                     help="Share of GDP spent by government on housing.  \n**Min:** 0 **Max:** 1 **Avg:** .0032")
-            community = st.number_input("Community development:", 
+            community = st.number_input("Community dev...:", 
                                     value=get_default_value('Community_development', .0019), 
                                     key="community",
                                     min_value=0.0,
