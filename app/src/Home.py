@@ -19,6 +19,8 @@ def updateSessionState(userID):
 
 def getUserNames(role_id):
     response = requests.get(f"{API_URL}/role/{role_id}").json()
+    response = {u["Name"]: u["UserID"] for u in response}
+
     return response
 
 # streamlit supports reguarl and wide layout (how the controls
@@ -50,7 +52,7 @@ with a2:
 
     with b1:
         voter_names = getUserNames(1)
-        voter_name = st.selectbox(label="Voters: ", options=(row["Name"] for row in voter_names))
+        voter_name = st.selectbox(label="Voters: ", options=voter_names.keys)
         if st.button(f"Log in as Voter, {voter_name}", use_container_width=True):
             updateSessionState(1)
             st.success("Logged in as Voter")
@@ -58,7 +60,7 @@ with a2:
 
     with b2:
         politician_names = getUserNames(2)
-        politician_name = st.selectbox(label="Politicians: ", options=(row["Name"] for row in politician_names))
+        politician_name = st.selectbox(label="Politicians: ", options=politician_names.keys)
 
         if st.button(f"Log in as Politician, {politician_name}", use_container_width=True):
             updateSessionState(7)
@@ -67,7 +69,7 @@ with a2:
 
     with b3:
         economist_names = getUserNames(3)
-        economist_name = st.selectbox(label="Economists: ", options=(row["Name"] for row in economist_names))
+        economist_name = st.selectbox(label="Economists: ", options=economist_names.keys())
         if st.button(f"Log in as Economist, {economist_name}", use_container_width=True):
             updateSessionState(13)
             st.success("Logged in as Economist")
