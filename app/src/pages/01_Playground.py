@@ -441,7 +441,7 @@ with col1:
                                     max_value=1.0,
                                     step=.001,
                                     format='%.4f',
-                                    help="Share of GDP spent by government on community development.  \n**Min:** 0 **Max:** 1 **Avg:** .0019")
+                                    help="Share of GDP (current US$) spent by government on community development.  \n**Min:** 0 **Max:** 1 **Avg:** .0019")
 
         with feature_cols[2]:
             corporate_tax = st.number_input("Corporate tax rate:", 
