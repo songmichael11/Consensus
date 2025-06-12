@@ -32,11 +32,16 @@ def getExpertOpinions(post_id):
     return response.json()
 
 def getQuestions(post_id):
-    API_BASE = "http://web-api:4000/expanded_posted/questions"
+    API_BASE = "http://web-api:4000/expanded_post/questions"
     url = f"{API_BASE}/{post_id}"
     response = requests.get(url)
     return response.json()
 
+def postQuestion(post, body):
+    url = f"http://web-api:4000/expanded_post/question/post/{post['PostID']}/user/{st.session_state.get('UserID', None)}"
+    return requests.post(url, json=body)
+
+# UI rendering
 def renderPlotlyGraph(post):
     response = requests.get(f"http://web-api:4000/models/posts/predict/{post['GraphID']}")
     data = response.json()
@@ -51,11 +56,11 @@ def renderPlotlyGraph(post):
 def renderBookmarkButton(post, mode="default"):
     # Bookmark button (simple placeholder)
     if post['bookmarked'] == 'Saved':
-        bookmark_icon = "💾"
+        bookmark_icon = ":material/bookmark_check:"
     else:
-        bookmark_icon = ":("
+        bookmark_icon = ":material/bookmark:"
 
-    if st.button(f"{bookmark_icon}", key=f"bookmark_{post['PostID']}_{mode}"):
+    if st.button(label=bookmark_icon, type="tertiary", key=f"bookmark_{post['PostID']}_{mode}"):
         if post['bookmarked'] == "Saved":
             response = updatePostUtils("delete", "bookmark", post["PostID"], user_id)
         else:
@@ -75,10 +80,6 @@ def renderUpvotesDownvotes(post, mode="default"):
             downvoteIcon = "⬇"
         else:
             downvoteIcon = "⇩"
-        if (post["endorsed"]) == "Endorsed":
-            endorsedIcon = "✅"
-        else:
-            endorsedIcon = "✔️"
         
         if st.button(label=upvoteIcon, key=f'upvote{post["PostID"]}_{mode}'):
             if post['upvoted'] == "Upvoted":
@@ -106,7 +107,7 @@ def renderEndorsement(post):
         endorsedIcon = "✔️"
 
     if "Politician" in st.session_state['Roles']:
-        if st.button(label=endorsedIcon, key=f'endorsement{post["PostID"]}', type='secondary'):
+        if st.button(label=endorsedIcon, key=f'endorsement{post["PostID"]}', type='tertiary'):
             if post['endorsed'] == "Endorsed":
                 response = updatePostUtils("delete", "endorsement", post["PostID"], user_id)
             else:
@@ -130,6 +131,14 @@ def renderQuestions(post):
         for question in data:
             st.write(f"{question['QuestionText']}")
 
+def renderQuestionButton(post):
+    body = {}
+    with st.popover(label="Ask a Question"):
+        body["QuestionText"] = st.text_input(label="Question", max_chars=300)
+        if st.button("Submit"):
+            response = postQuestion(post, body)
+            if response.status_code == 200:
+                st.write("Question Submitted!")
 
 # load user info from session
 user_id = st.session_state.get('UserID', None)
@@ -185,7 +194,11 @@ with st.container():
             renderExpertOps(post)
     with c3b:
         with st.container(border=True, height=300):
-            st.markdown('### Q&A')
+            c3ba, c3bb = st.columns([0.7, 0.3])
+            with c3ba:
+                st.markdown('### Q&A')
+            with c3bb:
+                renderQuestionButton(post)
             renderQuestions(post)
 
 # button to return to the feed

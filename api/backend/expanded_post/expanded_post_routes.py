@@ -87,6 +87,7 @@ def get_questions(post_id):
         return jsonify(questions), 200
 
     except Error as e:
+            current_app.logger.debug(f'Error: ' + str(e))
             return jsonify({"error": str(e)}), 500
 
 # post request to ask a question for a specific post, from a specific user
@@ -96,6 +97,7 @@ def post_question(post_id, user_id):
         current_app.logger.info(f"Starting post_question request for post {post_id} by user {user_id}")
 
         data = request.get_json()
+        current_app.logger.info(data)
 
         cursor = db.get_db().cursor()
 
@@ -122,13 +124,15 @@ def post_question(post_id, user_id):
         cursor.execute(insert_query, (data["QuestionText"], post_id))
         db.get_db().commit()
         new_question_id = cursor.lastrowid
+        current_app.logger.info(f"QuestionID {new_question_id}")
 
         # insert into bridge table too
         insert_query = """
             INSERT INTO UserQuestions (QuestionID, UserID) 
             VALUES (%s, %s)
         """
-        cursor.execute(insert_query, (new_question_id, post_id))
+
+        cursor.execute(insert_query, (new_question_id, user_id))
         db.get_db().commit()
 
         cursor.close()
@@ -201,10 +205,10 @@ def get_exops(post_id):
 
         current_app.logger.debug(f'Executing query: {query}', params)
         cursor.execute(query, params)
-        questions = cursor.fetchall()
+        exops = cursor.fetchall()
         cursor.close()
         
-        return jsonify(questions), 200
+        return jsonify(exops), 200
 
     except Error as e:
             return jsonify({"error": str(e)}), 500
