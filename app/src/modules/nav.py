@@ -21,7 +21,11 @@ def PlaygroundNav():
 
 # change 
 def PostGraphsNav():
-    st.sidebar.page_link("pages/03_SavedPosts.py", label="Make Post")
+    if "Politician" in st.session_state['Roles']:
+        label = 'Make Post'
+    else:
+        label = "Saved Graphs"
+    st.sidebar.page_link("pages/03_SavedPosts.py", label=label)
 
 def ProfileNav():
     st.sidebar.page_link("Home.py", label="My Profile")

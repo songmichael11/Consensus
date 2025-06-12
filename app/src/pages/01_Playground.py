@@ -174,7 +174,6 @@ graph_id = st.session_state.get('loaded_graph_id')
 if graph_id:
     graph_data = requests.get(API_BASE_URL + f"/playground/graph/{graph_id}").json()
     st.session_state['loaded_graph'] = graph_data
-st.write(str(graph_id))
 
 # Get user ID from session state (set during login)
 user_id = st.session_state.get('UserID')
