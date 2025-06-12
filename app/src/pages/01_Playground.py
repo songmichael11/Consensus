@@ -443,7 +443,7 @@ with col3:
     
     # Use features from backend if available
     available_features = st.session_state.available_features or list(FEATURE_MAPPING.keys())
-    
+    available_features = available_features[:-4]
     # Set default compare feature from loaded graph
     default_compare_feature = None
     if loaded_graph:
@@ -457,14 +457,38 @@ with col3:
     
     compare_feature = st.selectbox("Feature", available_features, 
                                  index=default_index, key="compare_feature")
+    feature_values = {
+                # Main features
+                "Population": population,
+                "GDP_per_capita": gdp_per_capita,
+                "Trade_union_density": trade_union,
+                "Unemployment_rate": unemployment,
+                "Health": health,
+                "Education": education,
+                "Housing": housing,
+                "Community_development": community,
+                "Corporate_tax_rate": corporate_tax,
+                "Inflation": inflation,
+                "IRLT": irlt,
+                
+                # Region features
+                "Region_East_Asia_and_Pacific": east_asia,
+                "Region_Europe_and_Central_Asia": europe,
+                "Region_Latin_America_and_Caribbean": latin_america,
+                "Region_Middle_East_and_North_Africa": middle_east
+            }
+    current_compared_value = feature_values[FEATURE_MAPPING[compare_feature]]
+
+    stds = requests.get(API_BASE_URL + "/models/playground/stds").json()[0]
+    current_std = stds[FEATURE_MAPPING[compare_feature]]
 
     # Set default values from loaded graph
-    default_x_min = loaded_graph.get('x_min', 0.0) if loaded_graph else 0.0
-    default_x_max = loaded_graph.get('x_max', 100.0) if loaded_graph else 100.0
+    default_x_min = loaded_graph.get('x_min', 0) if loaded_graph else 0
+    default_x_max = loaded_graph.get('x_max', current_compared_value + 3 * current_std) if loaded_graph else current_compared_value + 3 * current_std
     default_steps = loaded_graph.get('x_steps', 20) if loaded_graph else 20
 
-    x_min = st.number_input("Min:", value=float(default_x_min), key="x_min")
-    x_max = st.number_input("Max:", value=float(default_x_max), key="x_max")
+    x_min = st.number_input("Min:", value=float(default_x_min), key="x_min", format='%.4f')
+    x_max = st.number_input("Max:", value=float(default_x_max), key="x_max", format='%.4f')
     steps = st.number_input("Steps:", value=int(default_steps), min_value=5, max_value=100, key="steps")
     
     st.markdown("")

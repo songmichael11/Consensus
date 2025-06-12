@@ -68,6 +68,28 @@ def get_playground_predictions():
         current_app.logger.error(f"Error in gini_plot: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@models.route("/playground/stds", methods=["GET"])
+def get_stds():
+    try:
+        # get describe metrics
+        cursor = db.get_db().cursor()
+        cursor.execute(f"""SELECT {FEATURES_NO_REGION} FROM PredictMetrics WHERE Metric = 'std'""")
+        rows = cursor.fetchall()
+        
+        current_app.logger.info(rows)
+
+        cursor.close()
+
+        # columns = [col for col in rows[0].keys() if col != 'Metric']
+
+        # describe = [
+        #     [row[col] for col in columns] for row in rows
+        #     ]
+        return jsonify(rows)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # abstracted prediction function for both routes.
 # takes in a list of feature values and output a jsonified set of outputs
 def predict_from_features(row):
