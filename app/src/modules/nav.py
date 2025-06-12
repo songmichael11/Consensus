@@ -21,7 +21,7 @@ def PlaygroundNav():
 
 # change 
 def PostGraphsNav():
-    st.sidebar.page_link("03_SavedPosts.py", label="Post a Graph")
+    st.sidebar.page_link("pages/03_SavedPosts.py", label="Post a Graph")
 
 def ProfileNav():
     st.sidebar.page_link("Home.py", label="My Profile")
