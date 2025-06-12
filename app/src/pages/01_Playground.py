@@ -429,8 +429,6 @@ with col1:
             irlt = st.number_input("IRLT:", 
                                 value=get_default_value('IRLT', 7.9), 
                                 key="irlt",
-                                min_value=0.0,
-                                max_value=100.0,
                                 step=1.0,
                                 format='%.1f',
                                 help="Percent interest paid on long-term bonds and loans.  \n**Min:** 0 **Max:** 100 **Avg:** 3.5")   
