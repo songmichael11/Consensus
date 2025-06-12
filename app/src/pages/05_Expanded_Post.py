@@ -41,6 +41,9 @@ def postQuestion(post, body):
     url = f"http://web-api:4000/expanded_post/question/post/{post['PostID']}/user/{st.session_state.get('UserID', None)}"
     return requests.post(url, json=body)
 
+# def postExOp(post, body):
+
+
 # UI rendering
 def renderPlotlyGraph(post):
     response = requests.get(f"http://web-api:4000/models/posts/predict/{post['GraphID']}")
@@ -143,6 +146,17 @@ def renderQuestionButton(post):
             elif response.status_code == 210:
                 st.badge("User has submitted too many questions", color="red")
 
+def renderExpertInputButton(post):
+    body = {}
+    with st.popover(label="Add Expert Feedback"):
+        body["BodyText"] = st.text_input(label="ExpertInput", max_chars=600)
+        if st.button("Submit"):
+            response = postExOp(post, body)
+            if response.status_code == 200:
+                st.badge("Question Submitted!", color="green")
+            elif response.status_code == 210:
+                st.badge("User has already submitted feedback", color="orange")
+
 # load user info from session
 user_id = st.session_state.get('UserID', None)
 if not user_id:
@@ -193,7 +207,11 @@ with st.container():
     c3a, c3b = st.columns([0.5, 0.5])
     with c3a:
         with st.container(border=True, height=300):
-            st.markdown("#### Expert Opinions")
+            c3aa, c3ab = st.columns([0.55, 0.45], vertical_alignment="bottom")
+            with c3aa:
+                st.markdown("#### Expert Opinions")
+            with c3ab:
+                renderExpertInputButton(post)
             renderExpertOps(post)
     with c3b:
         with st.container(border=True, height=300):

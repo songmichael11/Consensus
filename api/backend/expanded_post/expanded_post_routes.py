@@ -212,3 +212,57 @@ def get_exops(post_id):
 
     except Error as e:
             return jsonify({"error": str(e)}), 500
+    
+# post request to add expert feedback for a specific post, from a specific user
+@expanded_post.route("/exops/post/<int:post_id>/user/<int:user_id>", methods=["POST"])
+def post_exop(post_id, user_id):
+    try:
+        current_app.logger.info(f"Starting post_exop request for post {post_id} by user {user_id}")
+
+        data = request.get_json()
+        current_app.logger.info(data)
+
+        cursor = db.get_db().cursor()
+
+        # First check if the user has already added expert feedback to this post
+        check_query = """
+            SELECT COUNT(eo.ExpertOpID) 
+            FROM ExpertOpinions eo
+                JOIN ExpertOpUsers eou
+                    ON eo.ExpertOpID = eou.ExpertOpID 
+            WHERE uq.UserID = %s AND q.PostID = %s
+        """
+        cursor.execute(check_query, (user_id, post_id))
+        exists = cursor.fetchone()['COUNT(eo.ExpertOpID)'] > 0
+
+        if exists: # If the user has already added feedback, return a 210 status
+            current_app.logger.info(f"User {user_id} has already added feedback {post_id}")
+            return jsonify({"message": "User has already added feedback"}), 210
+
+        # insert into questions table
+        insert_query = """
+            INSERT INTO ExpertOpinions (BodyText, PostID) 
+            VALUES (%s, %s)
+        """
+        cursor.execute(insert_query, (data["BodyText"], post_id))
+        db.get_db().commit()
+        new_exop_id = cursor.lastrowid
+        current_app.logger.info(f"ExpertOpID {new_exop_id}")
+
+        # insert into bridge table too
+        insert_query = """
+            INSERT INTO ExpertOpUsers (ExpertOpID, UserID) 
+            VALUES (%s, %s)
+        """
+
+        cursor.execute(insert_query, (new_exop_id, user_id))
+        db.get_db().commit()
+
+        cursor.close()
+
+        current_app.logger.info(f"Successfully added exop for post {post_id} by user {user_id}")
+        return jsonify({"message": "Successfully added question to post"}), 200
+
+    except Error as e:
+        current_app.logger.error(f"Database error in post_exop: {str(e)}")
+        return jsonify({"error": str(e)}), 500
