@@ -375,6 +375,8 @@ with col1:
                 value = get_region_from_features(loaded_graph['features'])
             elif selected_preset_data:
                 value = get_region_from_features(selected_preset_data)
+            else: 
+                value = 0
             return value
 
         with feature_cols[0]:

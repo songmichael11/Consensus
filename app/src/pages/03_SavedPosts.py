@@ -55,7 +55,8 @@ for graph in graphs:
             st.markdown(f"## {graph['name']}")
             st.markdown(f"#### {graph['date_saved'][:-9]}")
             if st.button("Open in Data Playground", key=f"dataPlaygroundButton{graph['graph_id']}"):
-                st.write("This should open")
+                st.session_state['loaded_graph_id'] = graph['graph_id']
+                st.switch_page("pages/01_Playground.py")
 
             if st.button("Make Post", key=f"makePost{graph['graph_id']}"):
                 st.session_state["PostedGraph"] = graph
