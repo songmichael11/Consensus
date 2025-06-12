@@ -145,6 +145,17 @@ def map_regions(region):
             regions["Latin America and Caribbean"], 
             regions["Middle East and North Africa"])
 
+def get_region_from_features(features):
+    if features["Region_East_Asia_and_Pacific"] == 1:
+        return 0
+    if features["Region_Europe_and_Central_Asia"] == 1:
+        return 1
+    if features["Region_Latin_America_and_Caribbean"] == 1:
+        return 2
+    if features["Region_Middle_East_and_North_Africa"] == 1:
+        return 3
+
+
 # Initialize session state
 if 'graph_data' not in st.session_state:
     st.session_state.graph_data = None
@@ -158,6 +169,12 @@ if not st.session_state.get('authenticated', False):
     if st.button("🏠 Go to Home Page", type="primary"):
         st.switch_page('Home.py')
     st.stop()
+
+graph_id = st.session_state.get('loaded_graph_id')
+if graph_id:
+    graph_data = requests.get(API_BASE_URL + f"/playground/graph/{graph_id}").json()
+    st.session_state['loaded_graph'] = graph_data
+st.write(str(graph_id))
 
 # Get user ID from session state (set during login)
 user_id = st.session_state.get('UserID')
@@ -288,6 +305,10 @@ with col1:
     # Apply preset button
     if selected_index != "No presets available" and st.button("📋 Apply Preset", use_container_width=True):
         # If the api call was successful then we can grab the data from the selected preset
+        if 'loaded_graph_id' in st.session_state:
+            del st.session_state['loaded_graph_id']
+        if 'loaded_graph' in st.session_state:
+            del st.session_state['loaded_graph']
         if preset_data:
             # Get the index for the selected preset, then grab the data from that index
             data_index = country_options.index(selected_index)
@@ -347,6 +368,14 @@ with col1:
                 return int(value)
             else:
                 return float(value)
+            
+        def get_default_region():
+            """Get default value with priority: loaded graph > preset > fallback"""
+            if loaded_graph and 'features' in loaded_graph:
+                value = get_region_from_features(loaded_graph['features'])
+            elif selected_preset_data:
+                value = get_region_from_features(selected_preset_data)
+            return value
 
         with feature_cols[0]:
             population = st.number_input("Population:", 
@@ -437,7 +466,8 @@ with col1:
                                                       "Europe and Central Asia", 
                                                       "Latin America and Caribbean", 
                                                       "Middle East and North Africa"],
-                                    help="Region of the world country is located.")
+                                    help="Region of the world country is located.",
+                                    index = get_default_region())
             east_asia, europe, latin_america, middle_east = map_regions(region)
             # Add some spacing for cleaner ui
             st.markdown("")
