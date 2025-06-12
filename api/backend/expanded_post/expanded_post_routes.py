@@ -74,7 +74,7 @@ def get_questions(post_id):
                         u.Name AS answerAuthor
                     FROM Questions q
                         LEFT JOIN Answers a 
-                            ON q.QuestionID = a.AnswerID
+                            ON q.QuestionID = a.QuestionID
                         LEFT JOIN Users u 
                             ON u.UserID = a.UserID
                     WHERE q.PostID = %s"""
@@ -149,7 +149,7 @@ def post_question(post_id, user_id):
 @expanded_post.route("/answer/question/<int:question_id>/user/<int:user_id>", methods=["POST"])
 def post_answer(question_id, user_id):
     try:
-        current_app.logger.info(f"Starting post_question request for post {question_id} by user {user_id}")
+        current_app.logger.info(f"Starting post_question request for question {question_id} by user {user_id}")
 
         data = request.get_json()
 
@@ -173,13 +173,13 @@ def post_answer(question_id, user_id):
             INSERT INTO Answers (AnswerText, QuestionID, UserID) 
             VALUES (%s, %s, %s)
         """
+        current_app.logger.info("insert query:", insert_query)
         cursor.execute(insert_query, (data["AnswerText"], question_id, user_id))
         db.get_db().commit()
-        new_question_id = cursor.lastrowid
 
         cursor.close()
 
-        current_app.logger.info(f"Successfully added question for question {question_id} by user {user_id}")
+        current_app.logger.info(f"Successfully added answer for question {question_id} by user {user_id}")
         return jsonify({"message": "Successfully added question to post"}), 200
 
     except Error as e:

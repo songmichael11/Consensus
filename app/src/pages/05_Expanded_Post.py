@@ -142,6 +142,8 @@ def renderQuestions(post):
                 st.write(f"{question['QuestionText']}")
                 if question["AnswerText"] == None:
                     renderAnswerButton(question)
+                else:
+                    st.write(question["AnswerText"])
 
 def renderQuestionButton(post):
     body = {}
@@ -162,6 +164,7 @@ def renderAnswerButton(question):
             response = postAnswer(question, body)
             if response.status_code == 200:
                 st.badge("Answer Submitted!", color="green")
+                st.rerun()
             elif response.status_code == 210:
                 st.badge("Question has already been answered", color="red")
 
