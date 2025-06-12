@@ -8,15 +8,19 @@ st.write("# About this App")
 
 st.markdown(
     """
-    This is a demo app for Data and Software in International Government and Politics Dialogue 2025 Project Course.  
-
-    The goal of this demo is to provide information on the tech stack 
-    being used as well as demo some of the features of the various platforms. 
-
-    Stay tuned for more information and features to come!
+    Policy is often black box and inaccesible, frequently missing data-backed evidence or voter feedback.
+    Our app, **Consesus**, fixes that. 
+    As the "Stack Overflow of Policy," our app centers around a feed of proposed policies, which all users can interact with.
+    - Politicians can make policy posts which always come with machine-learning driven graphs showing how their policies will affect 
+    the GINI Index, a measure of wealth inequality. 
+    - Voters can ask questions, save, and upvote or downvote posts, allowing them to give feedback and be more in tune with new policy proposals. 
+    - Economists can fact-check posts and have access to more advanced machine learning models, allowing them to see how policy proposals will 
+    affect communities more in-depth. \n
+    Finally, all users also have access to the data playground, where they can play around with how changing economic metrics, such as inflation or 
+    government spending on health, can affect the GINI index of a country.
     """
 )
 
 # Add a button to return to home page
-if st.button("Return to Home", type="primary"):
+if st.button("Return Home and Explore our App!", type="primary"):
     st.switch_page("Home.py")
