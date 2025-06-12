@@ -229,6 +229,9 @@ with st.container():
             st.write(post["Description"])
     with c2b:
         renderPlotlyGraph(post)
+        if st.button("Open in Data Playgound"):
+            st.session_state['loaded_graph_id'] = post['GraphID']
+            st.switch_page("pages/01_Playground.py")
 
 with st.container():
   c3a, c3b = st.columns([0.5, 0.5])
