@@ -6,7 +6,6 @@
 # Set up basic logging infrastructure
 import logging
 import streamlit as st
-from modules.nav import SideBarLinks
 import requests
 
 logging.basicConfig(format='%(filename)s:%(lineno)s:%(levelname)s -- %(message)s', level=logging.INFO)
@@ -30,32 +29,36 @@ st.session_state['authenticated'] = False
 # the links displayed on the left-side panel. 
 # IMPORTANT: ensure src/.streamlit/config.toml sets
 # showSidebarNavigation = false in the [client] section
-SideBarLinks(show_home=True)
+# SideBarLinks(show_home=True)
 logger.info("Loading the Home page of the app")
 
-# title
-st.markdown("<h1 style='font-size: 72px; text-align: center;'>Consensus</h1>", unsafe_allow_html=True)
+a1, a2 = st.columns([0.5, 0.5])
+with a1:
+    st.image("assets/logo.png")
+with a2: 
+    # title
+    st.markdown("<h1 style='font-size: 72px; text-align: center;'>Consensus</h1>", unsafe_allow_html=True)
 
-st.markdown("---")
-st.markdown("### Who would you like to log in as?")
+    st.markdown("---")
+    st.markdown("### Who would you like to log in as?")
 
-# Login Buttons in three columns
-b1, b2, b3 = st.columns(3)
+    # Login Buttons in three columns
+    b1, b2, b3 = st.columns(3)
 
-with b1:
-    if st.button("Log in as Voter,\nPrince Maximilian", use_container_width=True):
-        updateSessionState(1)
-        st.success("Logged in as Voter")
-        st.switch_page('pages/00_Feed.py')
+    with b1:
+        if st.button("Log in as Voter,\nPrince Maximilian", use_container_width=True):
+            updateSessionState(1)
+            st.success("Logged in as Voter")
+            st.switch_page('pages/00_Feed.py')
 
-with b2:
-    if st.button("Log in as Politician,\nJT Nance", use_container_width=True):
-        updateSessionState(7)
-        st.success("Logged in as Politician")
-        st.switch_page('pages/00_Feed.py')
+    with b2:
+        if st.button("Log in as Politician,\nJT Nance", use_container_width=True):
+            updateSessionState(7)
+            st.success("Logged in as Politician")
+            st.switch_page('pages/00_Feed.py')
 
-with b3:
-    if st.button("Log in as Economist,\nEmeka Okonkwo", use_container_width=True):
-        updateSessionState(13)
-        st.success("Logged in as Economist")
-        st.switch_page('pages/00_Feed.py')
+    with b3:
+        if st.button("Log in as Economist,\nEmeka Okonkwo", use_container_width=True):
+            updateSessionState(13)
+            st.success("Logged in as Economist")
+            st.switch_page('pages/00_Feed.py')
