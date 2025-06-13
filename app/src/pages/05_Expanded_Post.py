@@ -229,7 +229,7 @@ with st.container():
             st.write(post["Description"])
     with c2b:
         renderPlotlyGraph(post)
-        if st.button("Open in Data Playgound"):
+        if st.button("Open in Data Playground"):
             st.session_state['loaded_graph_id'] = post['GraphID']
             st.switch_page("pages/01_Playground.py")
 
