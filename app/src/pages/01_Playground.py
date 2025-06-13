@@ -540,18 +540,13 @@ with col1:
 
 
 with col3:
-    st.markdown("### Model & Feature Selection:")
+    # Role-based column header and model selection
+    user_roles = st.session_state.get('Roles', [])
+    is_economist = "Economist" in user_roles
+    st.markdown("### Feature to Compare:")
     
-    # Model selection toggle
-    model_type = st.radio(
-        "Prediction Model:",
-        options=["logistic", "deep_neural_network"],
-        format_func=lambda x: "Logistic Regression (GINI)" if x == "logistic" else "Deep Neural Network (Unemployment)",
-        key="model_type",
-        help="Choose between Logistic Regression (predicts GINI coefficient) or Deep Neural Network (predicts unemployment rate)"
-    )
-    
-    st.markdown("#### Feature to Compare:")
+    if is_economist == False:
+        model_type = "logistic"  # Set directly for non-economists
     
     # Use features from backend if available
     available_features = st.session_state.available_features or list(FEATURE_MAPPING.keys())
@@ -603,6 +598,17 @@ with col3:
     x_min = st.number_input("Min:", value=float(default_x_min), key="x_min", format='%.4f')
     x_max = st.number_input("Max:", value=float(default_x_max), key="x_max", format='%.4f')
     steps = st.number_input("Steps:", value=int(default_steps), min_value=5, max_value=100, step=1, key="steps")
+    
+    # Model selection for economists only (at bottom of controls)
+    if is_economist:
+        st.markdown("#### Prediction Model:")
+        model_type = st.radio(
+            "Choose model:",
+            options=["logistic", "deep_neural_network"],
+            format_func=lambda x: "Logistic Regression (GINI)" if x == "logistic" else "Deep Neural Network (Unemployment)",
+            key="model_type",
+            help="Choose between Logistic Regression (predicts GINI coefficient) or Deep Neural Network (predicts unemployment rate)"
+        )
     
     st.markdown("")
     
