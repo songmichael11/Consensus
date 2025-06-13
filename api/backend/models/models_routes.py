@@ -2,8 +2,9 @@ from flask import Blueprint, jsonify, request, current_app
 from backend.db_connection import db
 from mysql.connector import Error
 import numpy as np
-from backend.ml_models.logistic import predict_gini
-
+from backend.ml_models.logistic import predict_gini 
+from backend.ml_models.deep_neural_network.deep_neural_network import predict_unemployment_rate
+import json
 
 
 FEATURES_NO_REGION = """Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
@@ -66,6 +67,20 @@ def get_playground_predictions():
 
     except Exception as e:
         current_app.logger.error(f"Error in gini_plot: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+# POST request to get a plotly prediction graph for the data playground BUT USING DEEP NEURAL NETWORK
+@models.route("/playground/predict/deep_neural_network", methods=["POST"]) # NOTE: work in progress
+def get_playground_predictions_deep_neural_network():
+    try:
+        row = request.get_json()
+        current_app.logger.info(row)
+
+        output = predict_from_features_deep_neural_network(row)
+        return output
+
+    except Exception as e:
+        current_app.logger.error(f"Error in deep neural network route: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @models.route("/playground/stds", methods=["GET"])
@@ -153,4 +168,48 @@ def predict_from_features(row):
         return jsonify(output)
     except Exception as e:
         current_app.logger.error(f"Error in gini_plot: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
+# DNN function! abstracted prediction function for routes that use Deep Neural Network model.
+# takes in a list of feature values and output a jsonified set of outputs
+def predict_from_features_deep_neural_network(row):
+    try:
+        # get XAxis and range
+        x_axis = row["XAxis"]
+        x_min = row["XMin"]
+        x_max = row["XMax"]
+        num_steps = int(row["XStep"])  
+        x_values = np.linspace(x_min, x_max, num_steps)
+
+        unemployment_values = []
+
+        current_app.logger.info(f"Predicting unemployment for {len(x_values)} points using DNN")
+
+        for x_val in x_values:
+            x_input = row.copy()
+
+            x_input[x_axis] = x_val
+            
+            # Remove graph configuration parameters
+            x_input.pop("XAxis", None)
+            x_input.pop("XMin", None)
+            x_input.pop("XMax", None)
+            x_input.pop("XStep", None)
+
+            # Use the DNN prediction function
+            unemployment = predict_unemployment_rate(x_input)
+            # Ensure it's a standard Python float for JSON serialization
+            unemployment_values.append(float(unemployment))
+
+        output = {}
+        output["x_values"] = x_values.tolist()
+        output["predictions"] = unemployment_values
+        output["x_axis"] = FEATURE_MAP[x_axis]
+
+        current_app.logger.info(f"DNN prediction complete. Generated {len(unemployment_values)} predictions")
+
+        return jsonify(output)
+        
+    except Exception as e:
+        current_app.logger.error(f"Error in deep neural network prediction: {str(e)}")
         return jsonify({"error": str(e)}), 500

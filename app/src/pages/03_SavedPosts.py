@@ -58,9 +58,10 @@ for graph in graphs:
                 st.session_state['loaded_graph_id'] = graph['graph_id']
                 st.switch_page("pages/01_Playground.py")
 
-            if st.button("Make Post", key=f"makePost{graph['graph_id']}"):
-                st.session_state["PostedGraph"] = graph
-                st.switch_page("pages/04_Make_Post.py")
+            if "Politician" in st.session_state['Roles']:
+                if st.button("Make Post", key=f"makePost{graph['graph_id']}"):
+                    st.session_state["PostedGraph"] = graph
+                    st.switch_page("pages/04_Make_Post.py")
             
         with c2:
             renderPlotlyGraph(graph['graph_id'])

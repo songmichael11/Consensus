@@ -67,9 +67,9 @@ def renderPlotlyGraph(post):
 def renderBookmarkButton(post, mode="default"):
     # Bookmark button (simple placeholder)
     if post['bookmarked'] == 'Saved':
-        bookmark_icon = "💾"
+        bookmark_icon = ":material/bookmark_check:"
     else:
-        bookmark_icon = ":("
+        bookmark_icon = ":material/bookmark:"
 
     if st.button(f"{bookmark_icon}", key=f"bookmark_{post['PostID']}_{mode}"):
         if post['bookmarked'] == "Saved":
@@ -101,7 +101,7 @@ def renderUpvotesDownvotes(post, mode="default"):
             if response.status_code == 200:
                 st.rerun()
 
-        st.html(f"<p style='font-size: 30px; text-align: right; margin-right: 60px'>{str(post['karma'])}</p>")
+        st.html(f"<p style='font-size: 30px; text-align: right; margin-right: 70px'>{str(post['karma'])}</p>")
         if st.button(label=downvoteIcon, key=f'downvote{post["PostID"]}_{mode}'):
             if post['downvoted'] == "Downvoted":
                 response = updatePostUtils("delete", "downvote", post["PostID"], user_id)
@@ -113,7 +113,7 @@ def renderUpvotesDownvotes(post, mode="default"):
 
 def renderEndorsement(post):
     if (post["endorsed"]) == "Endorsed":
-        endorsedIcon = "✅"
+        endorsedIcon = ":material/verified:"
     else:
         endorsedIcon = "✔️"
 
@@ -127,7 +127,7 @@ def renderEndorsement(post):
             if response.status_code == 200:
                 st.rerun()
     else:
-        st.html(f"<p style='font-size: 20px; margin-left: 10px; margin-bottom: -5px; margin-right:-5px'>✅</p>")
+        st.markdown(":material/verified:")
 
 # sidebar
 SideBarLinks()

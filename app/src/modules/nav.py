@@ -19,9 +19,17 @@ def FeedNav():
 def PlaygroundNav():
     st.sidebar.page_link("pages/01_Playground.py", label="Data Playground")
 
+# _____ politicians____
+def AnalyticsNav():
+    st.sidebar.page_link("Home.py", label="Post Analytics")
+
 # change 
 def PostGraphsNav():
-    st.sidebar.page_link("pages/03_SavedPosts.py", label="Make Post")
+    if "Politician" in st.session_state['Roles']:
+        label = 'Make Post'
+    else:
+        label = "Saved Graphs"
+    st.sidebar.page_link("pages/03_SavedPosts.py", label=label)
 
 def ProfileNav():
     st.sidebar.page_link("Home.py", label="My Profile")
@@ -50,7 +58,11 @@ def SideBarLinks(show_home=False):
         FeedNav()
         PlaygroundNav()
         PostGraphsNav()
+        if "Politician" in st.session_state['Roles']:
+            AnalyticsNav()
         ProfileNav()
+
+    
 
     # Always show the About page at the bottom of the list of links
     AboutPageNav()

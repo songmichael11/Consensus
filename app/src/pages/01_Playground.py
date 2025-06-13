@@ -8,10 +8,9 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 from modules.nav import SideBarLinks
-from modules.presets import get_presets
 
 # API Configuration
-API_BASE_URL = "http://web-api:4000"  
+API_BASE_URL = "http://web-api:4000"
 
 # Page setup
 st.set_page_config(layout='wide')
@@ -50,6 +49,38 @@ def fetch_available_features():
     except requests.exceptions.RequestException as e:
         st.error(f"Error connecting to backend: {str(e)}")
         return None
+
+def load_preset(preset_data):
+    """Load a preset's data into the session state"""
+    if not preset_data:
+        return False
+        
+    # Map the region to the expected format
+    region_name = preset_data.get("Region", "Europe and Central Asia")
+    east_asia, europe, latin_america, middle_east = map_regions(region_name)
+    
+    # Create the preset data structure
+    preset_values = {
+        "Population": int(preset_data.get("Population", 22000000)),
+        "GDP_per_capita": float(preset_data.get("GDP_per_capita", 41000.0)),
+        "Trade_union_density": float(preset_data.get("Trade_union_density", 33.0)),
+        "Unemployment_rate": float(preset_data.get("Unemployment_rate", 8.0)),
+        "Health": float(preset_data.get("Health", 0.064)),
+        "Education": float(preset_data.get("Education", 0.052)),
+        "Housing": float(preset_data.get("Housing", 0.0032)),
+        "Community_development": float(preset_data.get("Community_development", 0.0019)),
+        "Corporate_tax_rate": float(preset_data.get("Corporate_tax_rate", 21.0)),
+        "Inflation": float(preset_data.get("Inflation", 2.1)),
+        "IRLT": float(preset_data.get("IRLT", 7.9)),
+        "Region_East_Asia_and_Pacific": east_asia,
+        "Region_Europe_and_Central_Asia": europe,
+        "Region_Latin_America_and_Caribbean": latin_america,
+        "Region_Middle_East_and_North_Africa": middle_east
+    }
+    
+    # Store the preset data in session state
+    st.session_state.selected_preset = preset_values
+    return True
 
 def save_graph_to_backend(user_id, graph_name, x_axis, x_min, x_max, x_steps, feature_values):
     """Save graph configuration to backend"""
@@ -103,8 +134,8 @@ def fetch_preset_options():
     except requests.exceptions.RequestException:
         return None
 
-def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
-    """Generate real GINI predictions using the actual model in the backend API"""
+def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps, model_type="logistic"):
+    """Generate real predictions using the actual model in the backend API"""
     try:
         # Prepare the request data with the correct structure for models endpoint
         data = {
@@ -115,22 +146,30 @@ def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
             **feature_values  # Include all feature values
         }
 
+        # Choose the appropriate endpoint based on model type
+        if model_type == "deep_neural_network":
+            endpoint = f"{API_BASE_URL}/models/playground/predict/deep_neural_network"
+            prediction_type = "unemployment rate"
+        else:
+            endpoint = f"{API_BASE_URL}/models/playground/predict"
+            prediction_type = "GINI coefficient"
+
         # Make the API call to the models endpoint
-        response = requests.post(f"{API_BASE_URL}/models/playground/predict", json=data, timeout=10)
+        response = requests.post(endpoint, json=data, timeout=10)
         
         if response.status_code == 200:
             result = response.json()
             x_values = result.get("x_values", [])
             y_values = result.get("predictions", [])
             
-            return x_values, y_values
+            return x_values, y_values, prediction_type
         else:
             st.error(f"Failed to generate predictions: {response.status_code}")
-            return None, None
+            return None, None, prediction_type
             
     except requests.exceptions.RequestException as e:
         st.error(f"Error connecting to backend: {str(e)}")
-        return None, None
+        return None, None, prediction_type
 
 # maps regions of selectbox into region variables that can be input into graph data
 # not sure if this is the most efficient way but it works
@@ -155,6 +194,35 @@ def get_region_from_features(features):
     if features["Region_Middle_East_and_North_Africa"] == 1:
         return 3
 
+def auto_generate_graph(feature_values, compare_feature, x_min, x_max, steps, model_type="logistic"):
+    """Automatically generate a graph with given parameters"""
+    try:
+        backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
+        
+        x_values, y_values, prediction_type = generate_real_predictions(
+            feature_values,
+            backend_feature_name,
+            x_min,
+            x_max,
+            int(steps),
+            model_type
+        )
+        
+        if x_values is not None and y_values is not None:
+            # Store in session state
+            st.session_state.graph_data = {
+                'x_values': x_values,
+                'y_values': y_values,
+                'feature_name': compare_feature,
+                'prediction_type': prediction_type,
+                'model_type': model_type
+            }
+            return True
+        else:
+            return False
+    except Exception as e:
+        logger.error(f"Error in auto_generate_graph: {str(e)}")
+        return False
 
 # Initialize session state
 if 'graph_data' not in st.session_state:
@@ -174,7 +242,10 @@ graph_id = st.session_state.get('loaded_graph_id')
 if graph_id:
     graph_data = requests.get(API_BASE_URL + f"/playground/graph/{graph_id}").json()
     st.session_state['loaded_graph'] = graph_data
-st.write(str(graph_id))
+    # Clear any existing graph data so auto-generation will trigger
+    st.session_state.graph_data = None
+    # Remove the loaded_graph_id so we don't process it again
+    del st.session_state['loaded_graph_id']
 
 # Get user ID from session state (set during login)
 user_id = st.session_state.get('UserID')
@@ -204,25 +275,20 @@ if st.session_state.available_features is None:
             st.session_state.available_features = list(FEATURE_MAPPING.keys())
             st.warning("⚠️ Backend unavailable - using default features")
 
+# This entire if statement loads and applies the first preset which should currently be Sweden (2019)
+if 'selected_preset' not in st.session_state and 'loaded_graph' not in st.session_state:
+    json_of_presets = fetch_preset_options()
+    if json_of_presets and "data" in json_of_presets and json_of_presets["data"]:
+        preset_data = json_of_presets["data"]
+        first_preset = preset_data[0]
+        
+        load_preset(first_preset)
+
+# Initialize auto-generation flag - should run if no graph data exists
+should_auto_generate_initial = st.session_state.graph_data is None
 
 # Show current user info in sidebar
 with st.sidebar:
-    st.markdown("### 👤 Current User")
-    user_name = st.session_state.get('Name', 'Unknown User')
-    user_roles = st.session_state.get('Roles', [])
-    
-    st.info(f"**{user_name}**")
-    if user_roles:
-        st.caption(f"Roles: {', '.join(user_roles)}")
-    
-    # Logout button
-    if st.button("🚪 Logout", use_container_width=True):
-        # Clear session state
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.success("Logged out successfully!")
-        st.switch_page('Home.py')
-    
     st.markdown("---")
     
     # Load saved graphs
@@ -251,8 +317,13 @@ with st.sidebar:
 
 # Main content area
 if st.session_state.graph_data is not None:
+    # Get prediction type and model info
+    prediction_type = st.session_state.graph_data.get('prediction_type', 'GINI coefficient')
+    model_type = st.session_state.graph_data.get('model_type', 'logistic')
+    model_name = "Deep Neural Network" if model_type == "deep_neural_network" else "Logistic Regression"
+    
     # Show the generated graph
-    st.markdown("### Generated GINI Coefficient Prediction")
+    st.markdown(f"### Generated {prediction_type.title()} Prediction ({model_name})")
     
     # Create plotly figure
     fig = go.Figure()
@@ -260,15 +331,15 @@ if st.session_state.graph_data is not None:
         x=st.session_state.graph_data['x_values'],
         y=st.session_state.graph_data['y_values'],
         mode='lines+markers',
-        name='GINI Prediction',
-        line=dict(color='#1f77b4', width=3),
+        name=f'{prediction_type.title()} Prediction',
+        line=dict(color='#1f77b4' if model_type == 'logistic' else '#ff7f0e', width=3),
         marker=dict(size=6)
     ))
     
     fig.update_layout(
-        title=f"GINI Coefficient vs {st.session_state.graph_data['feature_name']}",
+        title=f"{prediction_type.title()} vs {st.session_state.graph_data['feature_name']} ({model_name})",
         xaxis_title=st.session_state.graph_data['feature_name'],
-        yaxis_title='GINI Coefficient',
+        yaxis_title=prediction_type.title(),
         template='plotly_white',
         height=500,
         hovermode='x unified'
@@ -277,14 +348,14 @@ if st.session_state.graph_data is not None:
     st.plotly_chart(fig, use_container_width=True)
 else:
     # Show placeholder image when no graph is generated
-    st.image("assets/posts/placeholderGraph.gif", caption="GINI vs Population (example)")
+    st.image("assets/posts/placeholderGraph.gif", caption="Prediction vs Population (example)")
 
 # Columns for presets + controls
 col1, col2, col3 = st.columns([0.75, 0.05, 0.4])
 
 with col1:
     
-    json_of_presets = fetch_preset_options() # NOTE : working here rn
+    json_of_presets = fetch_preset_options()
     
     # Error handling for API response
     if json_of_presets and "data" in json_of_presets:
@@ -314,33 +385,9 @@ with col1:
             data_index = country_options.index(selected_index)
             matching_entry = preset_data[data_index]
             
-            # Map the region to the expected format
-            region_name = matching_entry.get("Region", "Europe and Central Asia")
-            east_asia, europe, latin_america, middle_east = map_regions(region_name)
-            
-            # Create the preset data structure
-            preset_values = {
-                "Population": int(matching_entry.get("Population", 22000000)),  # Convert to int
-                "GDP_per_capita": float(matching_entry.get("GDP_per_capita", 41000.0)),  # Convert to float
-                "Trade_union_density": float(matching_entry.get("Trade_union_density", 33.0)),
-                "Unemployment_rate": float(matching_entry.get("Unemployment_rate", 8.0)),
-                "Health": float(matching_entry.get("Health", 0.064)),
-                "Education": float(matching_entry.get("Education", 0.052)),
-                "Housing": float(matching_entry.get("Housing", 0.0032)),
-                "Community_development": float(matching_entry.get("Community_development", 0.0019)),
-                "Corporate_tax_rate": float(matching_entry.get("Corporate_tax_rate", 21.0)),
-                "Inflation": float(matching_entry.get("Inflation", 2.1)),
-                "IRLT": float(matching_entry.get("IRLT", 7.9)),
-                "Region_East_Asia_and_Pacific": east_asia,
-                "Region_Europe_and_Central_Asia": europe,
-                "Region_Latin_America_and_Caribbean": latin_america,
-                "Region_Middle_East_and_North_Africa": middle_east
-            }
-            
-            # Store the selected preset data in session state
-            st.session_state.selected_preset = preset_values
-            st.success(f"Applied preset: {selected_index}")
-            st.rerun()
+            if load_preset(matching_entry):
+                st.success(f"Applied preset: {selected_index}")
+                st.rerun()
         else:
             st.error("No preset data available")
 
@@ -434,7 +481,7 @@ with col1:
                                     step=.001,
                                     format='%.4f',
                                     help="Share of GDP spent by government on housing.  \n**Min:** 0 **Max:** 1 **Avg:** .0032")
-            community = st.number_input("Community development:", 
+            community = st.number_input("Community dev...:", 
                                     value=get_default_value('Community_development', .0019), 
                                     key="community",
                                     min_value=0.0,
@@ -493,7 +540,13 @@ with col1:
 
 
 with col3:
-    st.markdown("### Currently Comparing:")
+    # Role-based column header and model selection
+    user_roles = st.session_state.get('Roles', [])
+    is_economist = "Economist" in user_roles
+    st.markdown("### Feature to Compare:")
+    
+    if is_economist == False:
+        model_type = "logistic"  # Set directly for non-economists
     
     # Use features from backend if available
     available_features = st.session_state.available_features or list(FEATURE_MAPPING.keys())
@@ -546,7 +599,59 @@ with col3:
     x_max = st.number_input("Max:", value=float(default_x_max), key="x_max", format='%.4f')
     steps = st.number_input("Steps:", value=int(default_steps), min_value=5, max_value=100, step=1, key="steps")
     
+    # Model selection for economists only (at bottom of controls)
+    if is_economist:
+        st.markdown("#### Prediction Model:")
+        model_type = st.radio(
+            "Choose model:",
+            options=["logistic", "deep_neural_network"],
+            format_func=lambda x: "Logistic Regression (GINI)" if x == "logistic" else "Deep Neural Network (Unemployment)",
+            key="model_type",
+            help="Choose between Logistic Regression (predicts GINI coefficient) or Deep Neural Network (predicts unemployment rate)"
+        )
+    
     st.markdown("")
+    
+    # Auto-generate graph on initial load if needed
+    if should_auto_generate_initial:
+        with st.spinner("Loading initial graph..."):
+            # Collect all feature values using the actual UI values
+            feature_values = {
+                # Main features
+                "Population": population,
+                "GDP_per_capita": gdp_per_capita,
+                "Trade_union_density": trade_union,
+                "Unemployment_rate": unemployment,
+                "Health": health,
+                "Education": education,
+                "Housing": housing,
+                "Community_development": community,
+                "Corporate_tax_rate": corporate_tax,
+                "Inflation": inflation,
+                "IRLT": irlt,
+                
+                # Region features
+                "Region_East_Asia_and_Pacific": east_asia,
+                "Region_Europe_and_Central_Asia": europe,
+                "Region_Latin_America_and_Caribbean": latin_america,
+                "Region_Middle_East_and_North_Africa": middle_east
+            }
+            
+            backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
+            
+            success = auto_generate_graph(
+                feature_values,
+                compare_feature,
+                x_min,
+                x_max,
+                steps,
+                model_type
+            )
+            
+            if success:
+                st.rerun()  # Refresh to show the generated graph
+            else:
+                logger.warning("Auto-generation failed, will show stock image")
     
     # Generate button
     if st.button("🚀 Generate Graph", type="primary", use_container_width=True):
@@ -582,12 +687,13 @@ with col3:
             backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
             
             with st.spinner("Generating predictions..."):
-                x_values, y_values = generate_real_predictions(
+                x_values, y_values, prediction_type = generate_real_predictions(
                     feature_values,
                     backend_feature_name,
                     x_min,
                     x_max,
-                    int(steps)
+                    int(steps),
+                    model_type
                 )
                 
                 if x_values is not None and y_values is not None:
@@ -595,10 +701,12 @@ with col3:
                     st.session_state.graph_data = {
                         'x_values': x_values,
                         'y_values': y_values,
-                        'feature_name': compare_feature
+                        'feature_name': compare_feature,
+                        'prediction_type': prediction_type,
+                        'model_type': model_type
                     }
                     
-                    st.success("Graph generated successfully!")
+                    st.success(f"Graph generated successfully using {model_type.replace('_', ' ').title()}!")
                     st.rerun()
                 else:
                     st.error("Failed to generate predictions. Please try again.")

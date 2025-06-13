@@ -1,0 +1,52 @@
+{
+  "numerical_features": [
+    "Combined corporate income tax rate",
+    "Community development spending",
+    "Education spending",
+    "GDP per capita (current US$)",
+    "Gini index",
+    "Health spending",
+    "Housing spending",
+    "IRLT",
+    "Inflation, consumer prices (annual %)",
+    "Population, total",
+    "Trade union density"
+  ],
+  "categorical_features": [
+    "Region"
+  ],
+  "scaler_mean": [
+    25.38490906,
+    0.0019377341312809577,
+    0.052005888755457155,
+    40980.00975652196,
+    31.465,
+    0.06412704849776066,
+    0.003168130992237765,
+    3.4761538070153093,
+    2.0690977327914903,
+    21704346.735,
+    32.94699987125
+  ],
+  "scaler_scale": [
+    6.883617418936083,
+    0.0016854520301764148,
+    0.01488745335163426,
+    24339.397204605557,
+    5.209248986178334,
+    0.01769834820190922,
+    0.0033046809409587683,
+    2.2521300863135414,
+    1.9094662737438495,
+    26059202.102529477,
+    21.826917731845555
+  ],
+  "encoder_categories": [
+    [
+      "East Asia and Pacific",
+      "Europe and Central Asia",
+      "Latin America and Caribbean",
+      "Middle East and North Africa"
+    ]
+  ]
+}
