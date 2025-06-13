@@ -3,8 +3,8 @@ from backend.db_connection import db
 from mysql.connector import Error
 import numpy as np
 from backend.ml_models.logistic import predict_gini 
-from tensorflow.keras.models import load_model
-import os
+from backend.ml_models.deep_neural_network.deep_neural_network import predict_unemployment_rate
+import json
 
 
 FEATURES_NO_REGION = """Population, GDP_per_capita, Trade_union_density, Unemployment_rate,
@@ -172,27 +172,8 @@ def predict_from_features(row):
     
 # DNN function! abstracted prediction function for routes that use Deep Neural Network model.
 # takes in a list of feature values and output a jsonified set of outputs
-def predict_from_features_deep_neural_network(row): # NOTE: work in progress
+def predict_from_features_deep_neural_network(row):
     try:
-        # load in the keras model from ../ml_models/Unemployment.keras
-        model = load_model(os.path.join(os.path.dirname(__file__), 'ml_models', 'Unemployment.keras'))
-        current_app.logger.info(model)
-
-        # run a prediction on the model
-        prediction = model.predict(row)
-        current_app.logger.info(prediction)
-
-        # return the prediction
-        return jsonify({"prediction": prediction.tolist()})
-
-    except Exception as e:
-        current_app.logger.error(f"Error in deep neural network route: {str(e)}")
-        columns = [col for col in rows[0].keys() if col != 'Metric']
-
-        describe = [
-            [row[col] for col in columns] for row in rows
-            ]
-
         # get XAxis and range
         x_axis = row["XAxis"]
         x_min = row["XMin"]
@@ -200,34 +181,35 @@ def predict_from_features_deep_neural_network(row): # NOTE: work in progress
         num_steps = int(row["XStep"])  
         x_values = np.linspace(x_min, x_max, num_steps)
 
-        gini_values = []
+        unemployment_values = []
 
-        current_app.logger.info(f"Predicting GINI for {len(x_values)} points")
+        current_app.logger.info(f"Predicting unemployment for {len(x_values)} points using DNN")
 
         for x_val in x_values:
             x_input = row.copy()
 
             x_input[x_axis] = x_val
             
+            # Remove graph configuration parameters
             x_input.pop("XAxis", None)
             x_input.pop("XMin", None)
             x_input.pop("XMax", None)
             x_input.pop("XStep", None)
 
-            x_input = list(x_input.values())
-
-            gini = predict_gini(np.array(x_input), describe=np.array(describe), weights=np.array(weights), model="logistic")
-
-            gini_values.append(gini)
+            # Use the DNN prediction function
+            unemployment = predict_unemployment_rate(x_input)
+            # Ensure it's a standard Python float for JSON serialization
+            unemployment_values.append(float(unemployment))
 
         output = {}
         output["x_values"] = x_values.tolist()
-        output["predictions"] = gini_values
+        output["predictions"] = unemployment_values
         output["x_axis"] = FEATURE_MAP[x_axis]
 
-        current_app.logger.info(output)
+        current_app.logger.info(f"DNN prediction complete. Generated {len(unemployment_values)} predictions")
 
         return jsonify(output)
+        
     except Exception as e:
-        current_app.logger.error(f"Error in gini_plot: {str(e)}")
+        current_app.logger.error(f"Error in deep neural network prediction: {str(e)}")
         return jsonify({"error": str(e)}), 500

@@ -1,11 +1,12 @@
+matplotlib==3.10.0
+scikit-learn==1.6.1
+tensorflow==2.12.0
+pandas==2.2.3
 werkzeug==2.3.8
 flask==2.3.3
-pandas
 flask-restful==0.3.9
 flask-login==0.6.2
 flask-mysql==1.5.2
 mysql-connector==2.2.9
 cryptography==38.0.1
 python-dotenv==1.0.1
-numpy==1.26.4
-tensorflow==2.16.2

@@ -134,8 +134,8 @@ def fetch_preset_options():
     except requests.exceptions.RequestException:
         return None
 
-def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
-    """Generate real GINI predictions using the actual model in the backend API"""
+def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps, model_type="logistic"):
+    """Generate real predictions using the actual model in the backend API"""
     try:
         # Prepare the request data with the correct structure for models endpoint
         data = {
@@ -146,22 +146,30 @@ def generate_real_predictions(feature_values, x_axis, x_min, x_max, steps):
             **feature_values  # Include all feature values
         }
 
+        # Choose the appropriate endpoint based on model type
+        if model_type == "deep_neural_network":
+            endpoint = f"{API_BASE_URL}/models/playground/predict/deep_neural_network"
+            prediction_type = "unemployment rate"
+        else:
+            endpoint = f"{API_BASE_URL}/models/playground/predict"
+            prediction_type = "GINI coefficient"
+
         # Make the API call to the models endpoint
-        response = requests.post(f"{API_BASE_URL}/models/playground/predict", json=data, timeout=10)
+        response = requests.post(endpoint, json=data, timeout=10)
         
         if response.status_code == 200:
             result = response.json()
             x_values = result.get("x_values", [])
             y_values = result.get("predictions", [])
             
-            return x_values, y_values
+            return x_values, y_values, prediction_type
         else:
             st.error(f"Failed to generate predictions: {response.status_code}")
-            return None, None
+            return None, None, prediction_type
             
     except requests.exceptions.RequestException as e:
         st.error(f"Error connecting to backend: {str(e)}")
-        return None, None
+        return None, None, prediction_type
 
 # maps regions of selectbox into region variables that can be input into graph data
 # not sure if this is the most efficient way but it works
@@ -273,8 +281,13 @@ with st.sidebar:
 
 # Main content area
 if st.session_state.graph_data is not None:
+    # Get prediction type and model info
+    prediction_type = st.session_state.graph_data.get('prediction_type', 'GINI coefficient')
+    model_type = st.session_state.graph_data.get('model_type', 'logistic')
+    model_name = "Deep Neural Network" if model_type == "deep_neural_network" else "Logistic Regression"
+    
     # Show the generated graph
-    st.markdown("### Generated GINI Coefficient Prediction")
+    st.markdown(f"### Generated {prediction_type.title()} Prediction ({model_name})")
     
     # Create plotly figure
     fig = go.Figure()
@@ -282,15 +295,15 @@ if st.session_state.graph_data is not None:
         x=st.session_state.graph_data['x_values'],
         y=st.session_state.graph_data['y_values'],
         mode='lines+markers',
-        name='GINI Prediction',
-        line=dict(color='#1f77b4', width=3),
+        name=f'{prediction_type.title()} Prediction',
+        line=dict(color='#1f77b4' if model_type == 'logistic' else '#ff7f0e', width=3),
         marker=dict(size=6)
     ))
     
     fig.update_layout(
-        title=f"GINI Coefficient vs {st.session_state.graph_data['feature_name']}",
+        title=f"{prediction_type.title()} vs {st.session_state.graph_data['feature_name']} ({model_name})",
         xaxis_title=st.session_state.graph_data['feature_name'],
-        yaxis_title='GINI Coefficient',
+        yaxis_title=prediction_type.title(),
         template='plotly_white',
         height=500,
         hovermode='x unified'
@@ -299,7 +312,7 @@ if st.session_state.graph_data is not None:
     st.plotly_chart(fig, use_container_width=True)
 else:
     # Show placeholder image when no graph is generated
-    st.image("assets/posts/placeholderGraph.gif", caption="GINI vs Population (example)")
+    st.image("assets/posts/placeholderGraph.gif", caption="Prediction vs Population (example)")
 
 # Columns for presets + controls
 col1, col2, col3 = st.columns([0.75, 0.05, 0.4])
@@ -491,7 +504,18 @@ with col1:
 
 
 with col3:
-    st.markdown("### Currently Comparing:")
+    st.markdown("### Model & Feature Selection:")
+    
+    # Model selection toggle
+    model_type = st.radio(
+        "Prediction Model:",
+        options=["logistic", "deep_neural_network"],
+        format_func=lambda x: "Logistic Regression (GINI)" if x == "logistic" else "Deep Neural Network (Unemployment)",
+        key="model_type",
+        help="Choose between Logistic Regression (predicts GINI coefficient) or Deep Neural Network (predicts unemployment rate)"
+    )
+    
+    st.markdown("#### Feature to Compare:")
     
     # Use features from backend if available
     available_features = st.session_state.available_features or list(FEATURE_MAPPING.keys())
@@ -580,12 +604,13 @@ with col3:
             backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
             
             with st.spinner("Generating predictions..."):
-                x_values, y_values = generate_real_predictions(
+                x_values, y_values, prediction_type = generate_real_predictions(
                     feature_values,
                     backend_feature_name,
                     x_min,
                     x_max,
-                    int(steps)
+                    int(steps),
+                    model_type
                 )
                 
                 if x_values is not None and y_values is not None:
@@ -593,10 +618,12 @@ with col3:
                     st.session_state.graph_data = {
                         'x_values': x_values,
                         'y_values': y_values,
-                        'feature_name': compare_feature
+                        'feature_name': compare_feature,
+                        'prediction_type': prediction_type,
+                        'model_type': model_type
                     }
                     
-                    st.success("Graph generated successfully!")
+                    st.success(f"Graph generated successfully using {model_type.replace('_', ' ').title()}!")
                     st.rerun()
                 else:
                     st.error("Failed to generate predictions. Please try again.")
