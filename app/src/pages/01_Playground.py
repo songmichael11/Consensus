@@ -194,6 +194,35 @@ def get_region_from_features(features):
     if features["Region_Middle_East_and_North_Africa"] == 1:
         return 3
 
+def auto_generate_graph(feature_values, compare_feature, x_min, x_max, steps, model_type="logistic"):
+    """Automatically generate a graph with given parameters"""
+    try:
+        backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
+        
+        x_values, y_values, prediction_type = generate_real_predictions(
+            feature_values,
+            backend_feature_name,
+            x_min,
+            x_max,
+            int(steps),
+            model_type
+        )
+        
+        if x_values is not None and y_values is not None:
+            # Store in session state
+            st.session_state.graph_data = {
+                'x_values': x_values,
+                'y_values': y_values,
+                'feature_name': compare_feature,
+                'prediction_type': prediction_type,
+                'model_type': model_type
+            }
+            return True
+        else:
+            return False
+    except Exception as e:
+        logger.error(f"Error in auto_generate_graph: {str(e)}")
+        return False
 
 # Initialize session state
 if 'graph_data' not in st.session_state:
@@ -213,6 +242,10 @@ graph_id = st.session_state.get('loaded_graph_id')
 if graph_id:
     graph_data = requests.get(API_BASE_URL + f"/playground/graph/{graph_id}").json()
     st.session_state['loaded_graph'] = graph_data
+    # Clear any existing graph data so auto-generation will trigger
+    st.session_state.graph_data = None
+    # Remove the loaded_graph_id so we don't process it again
+    del st.session_state['loaded_graph_id']
 
 # Get user ID from session state (set during login)
 user_id = st.session_state.get('UserID')
@@ -250,6 +283,9 @@ if 'selected_preset' not in st.session_state and 'loaded_graph' not in st.sessio
         first_preset = preset_data[0]
         
         load_preset(first_preset)
+
+# Initialize auto-generation flag - should run if no graph data exists
+should_auto_generate_initial = st.session_state.graph_data is None
 
 # Show current user info in sidebar
 with st.sidebar:
@@ -569,6 +605,47 @@ with col3:
     steps = st.number_input("Steps:", value=int(default_steps), min_value=5, max_value=100, step=1, key="steps")
     
     st.markdown("")
+    
+    # Auto-generate graph on initial load if needed
+    if should_auto_generate_initial:
+        with st.spinner("Loading initial graph..."):
+            # Collect all feature values using the actual UI values
+            feature_values = {
+                # Main features
+                "Population": population,
+                "GDP_per_capita": gdp_per_capita,
+                "Trade_union_density": trade_union,
+                "Unemployment_rate": unemployment,
+                "Health": health,
+                "Education": education,
+                "Housing": housing,
+                "Community_development": community,
+                "Corporate_tax_rate": corporate_tax,
+                "Inflation": inflation,
+                "IRLT": irlt,
+                
+                # Region features
+                "Region_East_Asia_and_Pacific": east_asia,
+                "Region_Europe_and_Central_Asia": europe,
+                "Region_Latin_America_and_Caribbean": latin_america,
+                "Region_Middle_East_and_North_Africa": middle_east
+            }
+            
+            backend_feature_name = FEATURE_MAPPING.get(compare_feature, compare_feature)
+            
+            success = auto_generate_graph(
+                feature_values,
+                compare_feature,
+                x_min,
+                x_max,
+                steps,
+                model_type
+            )
+            
+            if success:
+                st.rerun()  # Refresh to show the generated graph
+            else:
+                logger.warning("Auto-generation failed, will show stock image")
     
     # Generate button
     if st.button("🚀 Generate Graph", type="primary", use_container_width=True):
